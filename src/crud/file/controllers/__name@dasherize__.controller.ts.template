@@ -4,9 +4,7 @@ import { UseValidationPipe } from "@utils/decorators/validation.pipe.decorator";
 import { <%= classify(name) %>Service } from "../<%= dasherize(name) %>.service";
 
 export class <%= classify(name) %>Controller {
-    constructor(private readonly service: <%= classify(name) %>Service) {
-        super(CONSTANT.NAME);
-    }
+    constructor(private readonly service: <%= classify(name) %>Service) {}
 
     @Get(":id")
     async findUnique(@Param("id", ParseIntPipe) id: number) {

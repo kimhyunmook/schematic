@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { I<%= classify(name) %>FindMany } from "././<%= dasherize(name) %>.type"
 
 @Injectable()
-export class <%= classify(name) %>Repository extends CommonRepository {
+export class <%= classify(name) %>Repository {
     private repository = this.prisma.<%= camelize(name) %>;
     constructor(private readonly prisma: PrismaCoreService) {
         super();
