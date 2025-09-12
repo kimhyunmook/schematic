@@ -1,0 +1,15 @@
+import { OmitType } from "@nestjs/swagger";
+import { <%= classify(name) %>Model } from "../../models/<%= dasherize(name) %>.model";
+import { ResponseDto, ResponseWithMetadataDto } from "@utils/.boilerplate/dto/response.dto";
+
+export class <%= classify(name) %>FindUniqueResponseDto extends ResponseDto {
+    data: <%= classify(name) %>FindUniqueData;
+}
+class <%= classify(name) %>FindUniqueData extends OmitType(<%= classify(name) %>Model, []) {}
+
+export class <%= classify(name) %>FindManyResponseDto extends ResponseWithMetadataDto {
+    data: <%= classify(name) %>FindManyData[];
+}
+class <%= classify(name) %>FindManyData extends OmitType(<%= classify(name) %>Model, []) {}
+
+

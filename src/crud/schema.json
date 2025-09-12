@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "crud-module",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the module",
+      "x-prompt": "What is the name of the module?"
+    },
+    "path": {
+      "type": "string",
+      "description": "Where to create the files",
+      "default": "src",
+      "x-prompt": "In which folder do you want to generate?"
+    }
+  },
+  "required": ["name"]
+}

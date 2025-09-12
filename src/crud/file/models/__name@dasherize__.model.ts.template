@@ -1,0 +1,9 @@
+import { $Enums } from "@prisma/client";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsInt, IsString, IsOptional, IsEmail, IsDate, IsUUID, IsIn } from "class-validator";
+import { Type } from "class-transformer";
+import { prismaEnum } from "@utils/.boilerplate/functions/prisma-enum";
+
+export class <%= classify(name) %>Model {}
+
+

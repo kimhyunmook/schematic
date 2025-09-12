@@ -1,0 +1,11 @@
+import { OmitType } from "@nestjs/swagger";
+import { <%= classify(name) %>Model } from "../../models/<%= dasherize(name) %>.model";
+import { ResponseDto } from "@utils/.boilerplate/dto/response.dto";
+
+export class <%= classify(name) %>CreateResponseDto extends ResponseDto {
+    data: <%= classify(name) %>CreateData;
+}
+
+class <%= classify(name) %>CreateData extends OmitType(<%= classify(name) %>Model, []) {}
+
+

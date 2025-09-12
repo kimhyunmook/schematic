@@ -1,0 +1,42 @@
+import { Body, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
+import { <%= classify(name) %>Constant as CONSTANT } from "../<%= dasherize(name) %>.constant";
+import { UseValidationPipe } from "@utils/decorators/validation.pipe.decorator";
+import { <%= classify(name) %>Service } from "../<%= dasherize(name) %>.service";
+
+export class <%= classify(name) %>Controller {
+    constructor(private readonly service: <%= classify(name) %>Service) {
+        super(CONSTANT.NAME);
+    }
+
+    @Get(":id")
+    async findUnique(@Param("id", ParseIntPipe) id: number) {
+        const res = await this.service.findUnique(id, {});
+        return this.getResponse(this.FIND_MESSAGE, res);
+    }
+
+    @Get()
+    async findMany(@Query() query) {
+        const { resources, meta } = await this.service.fidnMany(query);
+        return this.getResponse(this.FIND_MESSAGE, resources, meta);
+    }
+
+    @Post()
+    async create(@Body() body) {
+        const res = await this.service.create(body);
+        return this.getResponse(this.CREATE_MESSAGE, res);
+    }
+
+    @Put(":id")
+    async update(@Param("id", ParseIntPipe) id: number, @Body() body) {
+        const res = await this.service.update(id, body);
+        return this.getResponse(this.UPDATE_MESSAGE, res);
+    }
+
+    @Delete(":id")
+    async softDelete(@Param("id") id: number) {
+        const res = await this.service.softDelete(id);
+        return this.getResponse(this.DELETE_MESSAGE, res);
+    }
+}
+
+

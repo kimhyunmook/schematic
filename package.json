@@ -1,0 +1,33 @@
+{
+  "name": "schematic",
+  "version": "1.0.0",
+  "description": "NestJS CRUD Module Schematic",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "mkdirp dist/crud/file && cpx \"src/crud/file/**/*\" dist/crud/file",
+    "link": "npm run build && npm link",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nestjs",
+    "schematics",
+    "crud",
+    "generator"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@angular-devkit/schematics": "^20.3.1",
+    "@types/node": "^20.0.0",
+    "cpx": "^1.5.0",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2"
+  },
+  "schematics": "./src/collection.json"
+}

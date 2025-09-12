@@ -1,0 +1,9 @@
+import { IntersectionType, OmitType } from "@nestjs/swagger";
+import { <%= classify(name) %>Model } from "../models/<%= dasherize(name) %>.model";
+import { I<%= classify(name) %>Create } from "../<%= dasherize(name) %>.type";
+import { CreateDtoFromModel } from "src/common/dto/create-from-model.dto";
+import { <%= classify(name) %>Model } from "@utils/models/<%= dasherize(name) %>.model";
+
+export class Create<%= classify(name) %>Dto extends CreateDtoFromModel({ model: <%= classify(name) %>Model, pick: [], optional: [] }) implements I<%= dasherize(name) %>Create {}
+
+
