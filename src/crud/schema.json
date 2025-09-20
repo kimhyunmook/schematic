@@ -11,8 +11,14 @@
     "path": {
       "type": "string",
       "description": "Where to create the files",
-      "default": "src",
+      "default": "src/resources",
       "x-prompt": "In which folder do you want to generate?"
+    },
+    "prismaPath": {
+      "type": "string",
+      "description": "Path to prisma schema file in target project",
+      "default": "prisma/schema.prisma",
+      "x-prompt": "Path to prisma schema? (default prisma/schema.prisma)"
     }
   },
   "required": ["name"]

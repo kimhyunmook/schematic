@@ -1,10 +1,10 @@
 {
-    "$schema": "node_modules/@angular-devkit/schematics/collection-schema.json",
-    "schematics": {
-        "crud-module": {
-            "description": "Generate a CRUD module (controller, service, DTO, etc.)",
-            "factory": "../dist/crud/index#crudModule",
-            "schema": "./crud/schema.json"
-        }
+  "$schema": "node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "prisma": {
+      "description": "Generate a CRUD module (controller, service, DTO, etc.)",
+      "factory": "../dist/crud/index#crudModule",
+      "schema": "./crud/schema.json"
     }
+  }
 }

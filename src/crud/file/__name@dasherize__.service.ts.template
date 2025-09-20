@@ -1,18 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { <%= classify(name) %>Repository } from "./<%= dasherize(name) %>.repository";
+import { I<%= classify(name) %>Create, I<%= classify(name) %>FindUnique, I<%= classify(name) %>FindMany, I<%= classify(name) %>Update } from "./<%= dasherize(name) %>.type";
 
 @Injectable()
 export class <%= classify(name) %>Service {
     constructor(private readonly repository: <%= classify(name) %>Repository) {}
 
-    async create(data:I<%= classify(name) %>Create) {
+    async create(data: I<%= classify(name) %>Create) {
         return this.repository.create(data);
     }
 
     async findUnique(args: I<%= classify(name) %>FindUnique) {
         return this.repository.findUnique(args);
     }
-    async fidnMany(query) {
+    async fidnMany(query: I<%= classify(name) %>FindMany) {
         return this.repository.findMany(query);
     }
 
@@ -24,5 +24,3 @@ export class <%= classify(name) %>Service {
         return this.repository.sofrDelete(id);
     }
 }
-
-

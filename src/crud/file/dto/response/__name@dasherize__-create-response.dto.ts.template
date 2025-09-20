@@ -7,5 +7,3 @@ export class <%= classify(name) %>CreateResponseDto extends ResponseDto {
 }
 
 class <%= classify(name) %>CreateData extends OmitType(<%= classify(name) %>Model, []) {}
-
-

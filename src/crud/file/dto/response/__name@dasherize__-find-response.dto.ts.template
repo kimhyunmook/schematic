@@ -11,5 +11,3 @@ export class <%= classify(name) %>FindManyResponseDto extends ResponseWithMetada
     data: <%= classify(name) %>FindManyData[];
 }
 class <%= classify(name) %>FindManyData extends OmitType(<%= classify(name) %>Model, []) {}
-
-

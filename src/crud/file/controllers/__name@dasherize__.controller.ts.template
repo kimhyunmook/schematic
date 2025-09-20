@@ -1,40 +1,51 @@
 import { Body, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from "@nestjs/common";
-import { <%= classify(name) %>Constant as CONSTANT } from "../<%= dasherize(name) %>.constant";
+import { ApiController, ApiInformation } from "@utils/.boilerplate/decorators/controller.decorator";
+import { Constant as CONSTANT } from "../<%= dasherize(name) %>.constant";
 import { UseValidationPipe } from "@utils/decorators/validation.pipe.decorator";
 import { <%= classify(name) %>Service } from "../<%= dasherize(name) %>.service";
+import { <%= classify(name) %>CreateResponseDto } from "../dto/response/<%= dasherize(name) %>-create-response.dto";
+import { <%= classify(name) %>FindManyDto } from "../dto/<%= dasherize(name) %>-find.dto";
+import { <%= classify(name) %>FindManyResponseDto, <%= classify(name) %>FindUniqueResponseDto } from "../dto/response/<%= dasherize(name) %>-find-response.dto";
+import { <%= classify(name) %>CreateDto } from "../dto/<%= dasherize(name) %>-create.dto";
+import { <%= classify(name) %>UpdateDto } from "../dto/<%= dasherize(name) %>-update.dto";
+import { NoDataResponseDto } from "@utils/.boilerplate/dto/response.dto";
 
-export class <%= classify(name) %>Controller {
+@ApiController("management/<%= dasherize(name) %>")
+export class <%= classify(name) %>MgmtController  {
     constructor(private readonly service: <%= classify(name) %>Service) {}
 
     @Get(":id")
-    async findUnique(@Param("id", ParseIntPipe) id: number) {
-        const res = await this.service.findUnique(id, {});
+    @ApiInformation(`${CONSTANT.NAME} 상세 조회`, true)
+    async findUnique(@Param("id", ParseIntPipe) id: number): Promise<<%= classify(name) %>FindUniqueResponseDto> {
+        const res = await this.service.findUnique({ id });
         return this.getResponse(this.FIND_MESSAGE, res);
     }
 
     @Get()
-    async findMany(@Query() query) {
+    @ApiInformation(`${CONSTANT.NAME} 목록 조회`, true)
+    async findMany(@Query() query: <%= classify(name) %>FindManyDto): Promise<<%= classify(name) %>FindManyResponseDto> {
         const { resources, meta } = await this.service.fidnMany(query);
         return this.getResponse(this.FIND_MESSAGE, resources, meta);
     }
 
     @Post()
-    async create(@Body() body) {
+    @UseRoleGuard(...ROLE.MANAGEMENT.ALL)
+    async create(@Body() body: <%= classify(name) %>CreateDto): Promise<<%= classify(name) %>CreateResponseDto> {
         const res = await this.service.create(body);
         return this.getResponse(this.CREATE_MESSAGE, res);
     }
 
     @Put(":id")
-    async update(@Param("id", ParseIntPipe) id: number, @Body() body) {
-        const res = await this.service.update(id, body);
-        return this.getResponse(this.UPDATE_MESSAGE, res);
+    @UseRoleGuard(...ROLE.MANAGEMENT.ALL)
+    async update(@Param("id", ParseIntPipe) id: number, @Body() body: <%= classify(name) %>UpdateDto): Promise<NoDataResponseDto> {
+        await this.service.update(id, body);
+        return this.getResponse(this.UPDATE_MESSAGE, null);
     }
 
     @Delete(":id")
-    async softDelete(@Param("id") id: number) {
-        const res = await this.service.softDelete(id);
-        return this.getResponse(this.DELETE_MESSAGE, res);
+    @UseRoleGuard(...ROLE.MANAGEMENT.ALL)
+    async softDelete(@Param("id") id: number): Promise<NoDataResponseDto> {
+        await this.service.softDelete(id);
+        return this.getResponse(this.DELETE_MESSAGE, null);
     }
 }
-
-

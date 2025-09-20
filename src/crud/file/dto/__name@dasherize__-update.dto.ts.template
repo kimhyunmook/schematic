@@ -3,5 +3,3 @@ import { <%= classify(name) %>CreateDto } from "./<%= dasherize(name) %>-create.
 import { I<%= classify(name) %>Update } from "../<%= dasherize(name) %>.type";
 
 export class <%= classify(name) %>UpdateDto extends OmitType(PartialType(<%= classify(name) %>CreateDto), []) implements I<%= classify(name) %>Update {}
-
-
