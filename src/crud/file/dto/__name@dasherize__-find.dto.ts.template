@@ -1,7 +1,0 @@
-import { IntersectionType, PickType } from "@nestjs/swagger";
-import { <%= classify(name) %>Model } from "../models/<%= dasherize(name) %>.model";
-import { I<%= classify(name) %>FindUnique, I<%= classify(name) %>FindMany } from "../<%= dasherize(name) %>.type";
-import { PaginationDto } from "@utils/.boilerplate/dto/pagination.dto";
-
-export class <%= classify(name) %>FindUniqueDto extends IntersectionType(PickType(<%= classify(name) %>Model, ["id"])) implements I<%= classify(name) %>FindUnique {}
-export class <%= classify(name) %>FindManyDto extends PaginationDto implements I<%= classify(name) %>FindMany {}

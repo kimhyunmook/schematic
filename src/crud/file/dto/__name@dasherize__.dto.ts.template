@@ -1,0 +1,12 @@
+import { <%= classify(name) %>CreateDto } from "../dto/request/<%= dasherize(name) %>-create.dto";
+import { <%= classify(name) %>UpdateDto } from "../dto/request/<%= dasherize(name) %>-update.dto";
+import { <%= classify(name) %>FindManyDto } from "../dto/request/<%= dasherize(name) %>-find.dto";
+import { <%= classify(name) %>FindManyResponseDto, <%= classify(name) %>FindUniqueResponseDto } from "../dto/response/<%= dasherize(name) %>-find-response.dto";
+
+export {
+    <%= classify(name) %>CreateDto,
+    <%= classify(name) %>UpdateDto,
+    <%= classify(name) %>FindManyDto,
+    <%= classify(name) %>FindManyResponseDto,
+    <%= classify(name) %>FindUniqueResponseDto
+}

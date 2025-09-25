@@ -1,6 +1,6 @@
-import { <%= classify(name) %>CreateDto } from "./dto/<%= dasherize(name) %>-create.dto";
-import { <%= classify(name) %>FindManyDto, <%= classify(name) %>FindUniqueDto } from "./dto/<%= dasherize(name) %>-find.dto";
-import { <%= classify(name) %>UpdateDto } from "./dto/<%= dasherize(name) %>-update.dto";
+import { <%= classify(name) %>CreateDto } from "./dto/request/<%= dasherize(name) %>-create.dto";
+import { <%= classify(name) %>FindManyDto, <%= classify(name) %>FindUniqueDto } from "./dto/request/<%= dasherize(name) %>-find.dto";
+import { <%= classify(name) %>UpdateDto } from "./dto/request/<%= dasherize(name) %>-update.dto";
 
 /** create */
 export interface I<%= classify(name) %>Create extends <%= classify(name) %>CreateDto {}
@@ -11,5 +11,3 @@ export interface I<%= classify(name) %>FindMany extends <%= classify(name) %>Fin
 
 /** update */
 export interface I<%= classify(name) %>Update extends <%= classify(name) %>UpdateDto {}
-
-/** delete */
