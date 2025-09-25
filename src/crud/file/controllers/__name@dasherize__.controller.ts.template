@@ -1,9 +1,9 @@
 import { Body, Param, ParseIntPipe, Query } from "@nestjs/common";
 import { Constant as CONSTANT } from "../<%= dasherize(name) %>.constant";
-import { ApiController } from "src/common/decorators/api-controller.decorator";
 import { <%= classify(name) %>Service } from "../<%= dasherize(name) %>.service";
 import { IdOnlyResponseDto, NullDataResponseDto } from "src/common/dto/response.dto";
 import { CommonController } from "src/common/utils/common.controller";
+import { ApiController } from "src/common/decorators/api-controller.decorator";
 import { ApiDocs } from "src/common/decorators/api-docs-option.decorator";
 import {
     <%= classify(name) %>CreateDto,
@@ -40,7 +40,7 @@ export class <%= classify(name) %>Controller extends CommonController  {
 
     @ApiDocs({ method: "PATCH", endpoint: ":id", summary: `${CONSTANT.NAME} 수정` })
     async update(@Param("id", ParseIntPipe) id: number, @Body() body: <%= classify(name) %>UpdateDto): Promise<NullDataResponseDto> {
-        await this.service.update(id, body);
+        await this.service.update({ ...body, id });
         return this.responseData(this.UPDATE);
     }
 
