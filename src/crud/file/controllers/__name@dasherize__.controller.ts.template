@@ -19,32 +19,32 @@ export class <%= classify(name) %>Controller extends CommonController  {
         super(CONSTANT.NAME);
     }
 
-    @ApiDocs({ endpoint: ":id", summary: `${CONSTANT.NAME} 상세 조회` }, true)
+    @ApiDocs({ endpoint: ":id", summary: `${CONSTANT.NAME} 상세 조회` })
     async findUnique(@Param("id", ParseIntPipe) id: number): Promise<<%= classify(name) %>FindUniqueResponseDto> {
         const res = await this.service.findUnique({ id });
         return this.responseData(this.FIND_UNIQUE, res);
     }
 
-    @ApiDocs({ summary: `${CONSTANT.NAME} 목록 조회` }, true)
+    @ApiDocs({ summary: `${CONSTANT.NAME} 목록 조회` })
     async findMany(@Query() query: <%= classify(name) %>FindManyDto): Promise<<%= classify(name) %>FindManyResponseDto> {
         const { resources, meta } = await this.service.fidnMany(query);
         return this.responseData(this.FIND_MANY, resources, meta);
     }
 
-    @ApiDocs({ method: "POST", summary: `${CONSTANT.NAME} 생성` }, true)
+    @ApiDocs({ method: "POST", summary: `${CONSTANT.NAME} 생성` })
     async create(@Body() body: <%= classify(name) %>CreateDto): Promise<IdOnlyResponseDto> {
         const { id } = await this.service.create(body);
         return this.responseData(this.CREATE, { id });
     }
 
 
-    @ApiDocs({ method: "PATCH", endpoint: ":id", summary: `${CONSTANT.NAME} 수정` }, true)
+    @ApiDocs({ method: "PATCH", endpoint: ":id", summary: `${CONSTANT.NAME} 수정` })
     async update(@Param("id", ParseIntPipe) id: number, @Body() body: <%= classify(name) %>UpdateDto): Promise<NullDataResponseDto> {
         await this.service.update(id, body);
         return this.responseData(this.UPDATE);
     }
 
-    @ApiDocs({ method: "DELETE", endpoint: ":id", summary: `${CONSTANT.NAME} 삭제` }, true)
+    @ApiDocs({ method: "DELETE", endpoint: ":id", summary: `${CONSTANT.NAME} 삭제` })
     async softDelete(@Param("id") id: number): Promise<NullDataResponseDto> {
         await this.service.softDelete(id);
         return this.responseData(this.DELETE);
