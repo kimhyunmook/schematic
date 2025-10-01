@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, IsDate, IsBoolean, IsNumber } from "class-validator";
+import { IsString, IsOptional, IsDate, IsBoolean, IsNumber, IsEnum } from "class-validator";
 import { Type } from "class-transformer";
 import { $Enums, <%= classify(name) %> } from "@prisma/client";
 
@@ -18,7 +18,7 @@ export class <%= classify(name) %>Model implements <%= classify(name) %> {
       case 'Boolean': return 'boolean';
       case 'DateTime': return 'Date';
       case 'Json': return 'any';
-      default: return 'string';
+      default: return `$Enums.${t}`;
     }
   }
   function isEnum(t){
@@ -54,15 +54,16 @@ export class <%= classify(name) %>Model implements <%= classify(name) %> {
     }
   }
 %>
-  @ApiProperty({ description: '', type: <%= swaggerType(baseType) %>, nullable: <%= !!field.optional %><% if (isArray) { %>, isArray: true<% } %><% if (isEnum(baseType)) { %>, enum: <%= baseType %><% } %> })
+  @ApiProperty({ description: ''<% if (!isEnum(baseType)) { %>, type: <%= baseType === 'DateTime' ? 'Date' : swaggerType(baseType) %><% } %>, nullable: <%= !!field.optional %><% if (isArray) { %>, isArray: true<% } %><% if (isEnum(baseType)) { %>, enum: $Enums.<%= baseType %><% } %> })
 <% if (field.optional) { %>  @IsOptional()
-<% } %><% if (tsType(baseType) === 'string') { %>  @IsString()
+<% } %><% if (isEnum(baseType)) { %>  @IsEnum($Enums.<%= baseType %>)
+<% } else if (tsType(baseType) === 'string') { %>  @IsString()
 <% } else if (tsType(baseType) === 'number') { %>  @IsNumber()
   @Type(() => Number)
 <% } else if (tsType(baseType) === 'boolean') { %>  @IsBoolean()
 <% } else if (tsType(baseType) === 'Date') { %>  @IsDate()
   @Type(() => Date)
-<% } %>  <%= field.name %><% if (field.optional) { %>?<% } %>: <%= tsType(baseType) %><% if (isArray) { %>[]<% } %>;
+<% } %>  <%= field.name %>: <%= tsType(baseType) %><% if (isArray) { %>[]<% } %><% if (field.optional) { %> | null<% } %>;
 <% }); %>
 <% } %>
 }
