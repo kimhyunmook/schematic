@@ -4,6 +4,7 @@ export interface PrismaModelField {
     name: string;
     type: string;
     optional: boolean;
+    description?: string;
 }
 
 export interface PrismaModel {
@@ -58,6 +59,7 @@ function parseModelFields(body: string): PrismaModelField[] {
 
     for (const line of lines) {
         const trimmed = line.trim();
+
         if (
             !trimmed ||
             trimmed.startsWith("@") ||
@@ -68,7 +70,9 @@ function parseModelFields(body: string): PrismaModelField[] {
         }
 
         const m = trimmed.match(lineRegex);
-        if (!m) continue;
+        if (!m) {
+            continue;
+        }
 
         const fName = m[1] ?? "";
         const fType = m[2] ?? "any";
@@ -76,14 +80,28 @@ function parseModelFields(body: string): PrismaModelField[] {
         const isOptional = Boolean(m[4]);
 
         // Skip relation fields and array (list) fields
-        if (isArray) continue;
-        if (/\@relation\b/.test(trimmed)) continue;
+        if (isArray) {
+            continue;
+        }
+        if (/\@relation\b/.test(trimmed)) {
+            continue;
+        }
 
-        fields.push({
+        // Extract inline comment after ///
+        const commentMatch = trimmed.match(/\/\/\/\s*(.+)$/);
+        const description = commentMatch?.[1]?.trim();
+
+        const field: PrismaModelField = {
             name: fName,
             type: isArray ? `${fType}[]` : fType,
             optional: isOptional,
-        });
+        };
+
+        if (description) {
+            field.description = description;
+        }
+
+        fields.push(field);
     }
 
     return fields;

@@ -1,71 +1,79 @@
 import { Injectable } from "@nestjs/common";
-import { I<%= classify(name) %>Create, I<%= classify(name) %>FindUnique, I<%= classify(name) %>FindMany, I<%= classify(name) %>Update } from "./<%= dasherize(name) %>.type";
-import { PrismaService, Prisma } from "src/core/prisma/prisma.service";
-import { Constant } from "./<%= dasherize(name) %>.constant";
+import {
+  I<%= classify(name) %>Create,
+  I<%= classify(name) %>FindUnique,
+  I<%= classify(name) %>FindMany,
+  I<%= classify(name) %>Update,
+} from "./<%= dasherize(name) %>.interface";
+import { PrismaService } from "src/core/prisma/prisma.service";
+import { CommonService } from "src/common/utils/common.service";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class <%= classify(name) %>Service extends CommonService {
-    constructor(private readonly prisma: PrismaService) {
-        super(Constant)
-    }
+  public static readonly MODULE_NAME = "<%= classify(name) %>";
 
-    async create(data: I<%= classify(name) %>Create) {
-        return this.prisma.<%= dasherize(name) %>.create({ data });
-    }
+  constructor(private readonly prisma: PrismaService) {
+    super({ NAME: <%= classify(name) %>Service.MODULE_NAME });
+  }
 
-    async findUnique(data: I<%= classify(name) %>FindUnique) {
-        return this.prisma.<%= dasherize(name) %>.findUnique({
-            where: {
-                ...data
-            }
-        });
-    }
-    
-    async fidnMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
-        const option: Prisma.<%= classify(name) %>FindManyArgs = {
-            where: { ...rest },
-            take,
-            skip: (page - 1) * take,
-            orderBy: (() => {
-                switch (sort) {
-                default:
-                    return { createdAt: "desc" };
-                }
-            })(),
-        };
+  async create(data: I<%= classify(name) %>Create) {
+    return this.prisma.<%= dasherize(name) %>.create({ data });
+  }
 
-        const [resources, totalCount] = await this.prisma.$transaction([
-            this.prisma.<%= dasherize(name) %>.findMany(option),
-            this.prisma.<%= dasherize(name) %>.count({ where: option.where }),
-        ]);
+  async findUnique(data: I<%= classify(name) %>FindUnique) {
+    return this.prisma.<%= dasherize(name) %>.findUnique({
+      where: {
+        ...data,
+      },
+    });
+  }
 
-        const meta = this.getMetaData({
-            page,
-            take,
-            totalCount,
-        });
+  async fidnMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
+    const option: Prisma.<%= classify(name) %>FindManyArgs = {
+      where: { ...rest },
+      take,
+      skip: (page - 1) * take,
+      orderBy: (() => {
+        switch (sort) {
+          default:
+            return { createdAt: "desc" };
+        }
+      })(),
+    };
 
-        return { resources, meta };
-    }
+    const [resources, totalCount] = await this.prisma.$transaction([
+      this.prisma.<%= dasherize(name) %>.findMany(option),
+      this.prisma.<%= dasherize(name) %>.count({ where: option.where }),
+    ]);
 
-    async update(data: I<%= classify(name) %>Update) {
-        const { id, ...rest } = data;
-        return this.prisma.<%= dasherize(name) %>.update({
-            where: {
-                id
-            },
-            data: {
-                ...rest
-            }
-        });
-    }
+    const meta = this.getMetaData({
+      page,
+      take,
+      totalCount,
+    });
 
-    async softDelete(id: number) {
-        return this.prisma.<%= dasherize(name) %>.update({
-            where: { id },
-            data: {
-                deletedAt: new Date()
-            }
-        });
-    }
+    return { resources, meta };
+  }
+
+  async update(data: I<%= classify(name) %>Update) {
+    const { id, ...rest } = data;
+    return this.prisma.<%= dasherize(name) %>.update({
+      where: {
+        id,
+      },
+      data: {
+        ...rest,
+      },
+    });
+  }
+
+  async softDelete(id: number) {
+    return this.prisma.<%= dasherize(name) %>.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
 }

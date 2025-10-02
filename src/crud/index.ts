@@ -1,10 +1,11 @@
-import { Rule, SchematicContext, Tree } from "@angular-devkit/schematics";
+import { Rule, SchematicContext, Tree, chain } from "@angular-devkit/schematics";
 import { CrudSchema } from "./schema";
 import {
   parsePackageConfig,
   findPrismaFile,
   parsePrismaModel,
   generateCrudTemplate,
+  formatWithPrettier,
 } from "./utils";
 
 /**
@@ -28,6 +29,12 @@ export function crudModule(options: CrudSchema): Rule {
     const resolvedPath = options.path ?? packageConfig.path ?? "src/resources";
     const templateRule = generateCrudTemplate(options, prismaModel, resolvedPath);
 
-    return templateRule(tree, context);
+    // 5. Format with Prettier (if available)
+    const prettierRule = formatWithPrettier(options, resolvedPath);
+
+    return chain([
+      templateRule,
+      prettierRule,
+    ])(tree, context);
   };
 }

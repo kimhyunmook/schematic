@@ -54,7 +54,7 @@ export class <%= classify(name) %>Model implements <%= classify(name) %> {
     }
   }
 %>
-  @ApiProperty({ description: ''<% if (!isEnum(baseType)) { %>, type: <%= baseType === 'DateTime' ? 'Date' : swaggerType(baseType) %><% } %>, nullable: <%= !!field.optional %><% if (isArray) { %>, isArray: true<% } %><% if (isEnum(baseType)) { %>, enum: $Enums.<%= baseType %><% } %> })
+  @ApiProperty({ description: '<%= field.description || "" %>'<% if (!isEnum(baseType)) { %>, type: <%= baseType === 'DateTime' ? 'Date' : swaggerType(baseType) %><% } %>, nullable: <%= !!field.optional %><% if (isArray) { %>, isArray: true<% } %><% if (isEnum(baseType)) { %>, enum: $Enums.<%= baseType %><% } %> })
 <% if (field.optional) { %>  @IsOptional()
 <% } %><% if (isEnum(baseType)) { %>  @IsEnum($Enums.<%= baseType %>)
 <% } else if (tsType(baseType) === 'string') { %>  @IsString()
