@@ -1,6 +1,7 @@
 import { <%= classify(name) %>CreateDto } from "./dto/request/<%= dasherize(name) %>-create.dto";
 import { <%= classify(name) %>FindManyDto, <%= classify(name) %>FindUniqueDto } from "./dto/request/<%= dasherize(name) %>-find.dto";
 import { <%= classify(name) %>UpdateDto } from "./dto/request/<%= dasherize(name) %>-update.dto";
+
 /**
  * Service layer interfaces
  * 서비스 계층에서 사용하는 순수 타입 정의
