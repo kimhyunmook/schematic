@@ -12,7 +12,7 @@ import {
   <%= classify(name) %>FindUniqueResponseDto,
 } from "../dto/response/<%= dasherize(name) %>-find-response.dto";
 
-@ApiController("management/<%= dasherize(name) %>")
+@ApiController("<%= dasherize(name) %>")
 export class <%= classify(name) %>Controller extends CommonController {
   constructor(private readonly service: <%= classify(name) %>Service) {
     super(<%= classify(name) %>Service.MODULE_NAME);
