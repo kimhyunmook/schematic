@@ -7,6 +7,7 @@ import {
 } from "./<%= dasherize(name) %>.interface";
 import { PrismaService } from "src/core/prisma/prisma.service";
 import { CommonService } from "src/common/utils/common.service";
+import { createPaginationOptions } from "src/common/helpers/pagination.helper";
 import { Prisma } from "@prisma/client";
 
 @Injectable()
@@ -32,14 +33,7 @@ export class <%= classify(name) %>Service extends CommonService {
   async fidnMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
     const option: Prisma.<%= classify(name) %>FindManyArgs = {
       where: { ...rest },
-      take,
-      skip: (page - 1) * take,
-      orderBy: (() => {
-        switch (sort) {
-          default:
-            return { createdAt: "desc" };
-        }
-      })(),
+      ...createPaginationOptions({ page, take, sort }),
     };
 
     const [resources, totalCount] = await this.prisma.$transaction([
