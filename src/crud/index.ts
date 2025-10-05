@@ -6,6 +6,7 @@ import {
   parsePrismaModel,
   generateCrudTemplate,
   formatWithPrettier,
+  updateAppModuleRule,
 } from "./utils";
 
 /**
@@ -29,11 +30,15 @@ export function crudModule(options: CrudSchema): Rule {
     const resolvedPath = options.path ?? packageConfig.path ?? "src/resources";
     const templateRule = generateCrudTemplate(options, prismaModel, resolvedPath);
 
-    // 5. Format with Prettier (if available)
+    // 5. Update app.module.ts
+    const appModuleRule = updateAppModuleRule(options.name, resolvedPath);
+
+    // 6. Format with Prettier (if available)
     const prettierRule = formatWithPrettier(options, resolvedPath);
 
     return chain([
       templateRule,
+      appModuleRule,
       prettierRule,
     ])(tree, context);
   };
