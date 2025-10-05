@@ -4,12 +4,15 @@
   "description": "NestJS CRUD Module Schematic",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "schematic": "./dist/bin/cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "postbuild": "mkdirp dist/crud/file && cpx \"src/crud/file/**/*\" dist/crud/file && cpx \"src/collection.json\" dist/ && cpx \"src/crud/schema.json\" dist/crud/",
+    "postbuild": "mkdirp dist/crud/file && cpx \"src/crud/file/**/*\" dist/crud/file && cpx \"src/collection.json\" dist/ && cpx \"src/crud/schema.json\" dist/crud/ && mkdirp dist/bin && cpx \"src/bin/**/*\" dist/bin/",
     "link": "npm run build && npm link",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
