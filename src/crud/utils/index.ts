@@ -1,3 +1,4 @@
+export * from "./config";
 export * from "./config-parser";
 export * from "./prisma-file-finder";
 export * from "./prisma-model-parser";

@@ -16,3 +16,4 @@ export class <%= classify(name) %>FindUniqueDto
 export class <%= classify(name) %>FindManyDto
   extends createPaginationDto([CREATED_AT])
   implements I<%= classify(name) %>FindMany {}
+

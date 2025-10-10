@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "crud": {
-      "description": "Generate a CRUD module (controller, service, DTO, etc.)",
+    "crud-module": {
+      "description": "Generate a CRUD module with domain templates (controller, service, DTO, etc.)",
       "factory": "../dist/crud/index#crudModule",
       "schema": "./crud/schema.json"
     }

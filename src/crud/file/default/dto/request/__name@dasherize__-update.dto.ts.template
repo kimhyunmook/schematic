@@ -9,3 +9,4 @@ export class <%= classify(name) %>UpdateDto
     OmitType(PartialType(<%= classify(name) %>CreateDto), [])
   )
   implements I<%= classify(name) %>Update {}
+

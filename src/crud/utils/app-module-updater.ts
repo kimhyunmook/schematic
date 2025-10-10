@@ -47,7 +47,6 @@ export function addModuleToAppModule(
 
     // 이미 모듈이 import되어 있는지 확인
     if (content.includes(moduleName)) {
-        console.log(`✅ ${moduleName}이 이미 app.module.ts에 추가되어 있습니다.`);
         return;
     }
 
@@ -82,8 +81,6 @@ export function addModuleToAppModule(
     // 2. 최상위 @Module 데코레이터의 imports 배열에만 모듈 추가
     // 파일을 줄별로 분석해서 정확히 최상위 @Module의 imports 배열 끝을 찾기
 
-    console.log(`🔍 ${moduleName} 모듈을 imports 배열에 추가하는 중...`);
-
     const lines = updatedContent.split('\n');
     let inTopLevelModule = false;
     let inImportsArray = false;
@@ -102,7 +99,6 @@ export function addModuleToAppModule(
         if (trimmedLine.startsWith('@Module') && !inTopLevelModule) {
             inTopLevelModule = true;
             moduleBracketCount = 0;
-            console.log(`📍 @Module 발견: ${i + 1}번째 줄`);
             continue;
         }
 
@@ -112,7 +108,6 @@ export function addModuleToAppModule(
                 foundImportsStart = true;
                 inImportsArray = true;
                 bracketCount = 1; // 첫 번째 [ 카운트
-                console.log(`📍 imports 배열 시작: ${i + 1}번째 줄`);
                 continue;
             }
 
@@ -121,12 +116,9 @@ export function addModuleToAppModule(
                 bracketCount += (line.match(/\[/g) || []).length;
                 bracketCount -= (line.match(/\]/g) || []).length;
 
-                console.log(`📍 ${i + 1}번째 줄 - 대괄호 카운트: ${bracketCount} - "${trimmedLine}"`);
-
                 // imports 배열 끝 감지
                 if (bracketCount === 0) {
                     importsEndLine = i;
-                    console.log(`📍 imports 배열 끝: ${i + 1}번째 줄`);
                     break;
                 }
             } else {
@@ -136,7 +128,6 @@ export function addModuleToAppModule(
 
                 // 최상위 @Module 끝 감지 (imports 배열을 찾기 전에만)
                 if (moduleBracketCount === 0 && inTopLevelModule && !foundImportsStart) {
-                    console.log(`📍 @Module 끝 (imports 찾기 전): ${i + 1}번째 줄`);
                     break;
                 }
             }
@@ -147,11 +138,8 @@ export function addModuleToAppModule(
         // imports 배열의 마지막 줄에서 ] 앞에 모듈 추가
         const lastLine = lines[importsEndLine];
         if (!lastLine) {
-            console.log("⚠️  imports 배열의 마지막 줄을 찾을 수 없습니다.");
             return;
         }
-
-        console.log(`📝 마지막 줄: "${lastLine}"`);
 
         const bracketIndex = lastLine.lastIndexOf(']');
         if (bracketIndex !== -1) {
@@ -169,15 +157,11 @@ export function addModuleToAppModule(
 
             lines[importsEndLine] = newLastLine;
             updatedContent = lines.join('\n');
-            console.log(`✅ ${moduleName} 모듈이 imports 배열에 추가되었습니다.`);
         }
-    } else {
-        console.log("⚠️  최상위 @Module의 imports 배열을 찾을 수 없습니다.");
     }
 
     // 파일 업데이트
     tree.overwrite(modulePath, updatedContent);
-    console.log(`✅ ${moduleName}이 app.module.ts에 성공적으로 추가되었습니다.`);
 }
 
 /**
@@ -199,7 +183,6 @@ export function updateAppModuleRule(moduleName: string, modulePath: string): any
         const appModuleInfo = findAppModule(tree, moduleName);
 
         if (!appModuleInfo) {
-            console.log("⚠️  app.module.ts 파일을 찾을 수 없습니다. 수동으로 모듈을 추가해주세요.");
             return tree;
         }
 

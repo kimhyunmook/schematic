@@ -1,101 +1,105 @@
 import { Tree, SchematicContext } from "@angular-devkit/schematics";
-import { strings } from "@angular-devkit/core";
+import { getConfig } from "./config";
 
 /**
- * Prisma 파일을 재귀적으로 검색하는 함수
- * 다음 순서로 검색합니다:
- * 1. 직접 경로: prisma/name.prisma
- * 2. 중첩 경로: prisma/name/name.prisma
- * 3. 재귀 검색: 모든 하위 폴더에서 name.prisma 찾기
+ * Prisma 스키마 파일을 찾습니다.
+ * 설정된 검색 디렉토리에서 재귀적으로 찾습니다.
  */
 export function findPrismaFile(
-    tree: Tree,
-    context: SchematicContext,
-    moduleName: string,
-    prismaDir = "prisma"
+  tree: Tree,
+  context: SchematicContext,
+  moduleName: string,
+  explicitPath?: string
 ): string | null {
-    const prismaFileName = `${strings.dasherize(String(moduleName))}.prisma`;
+  const config = getConfig();
 
-    // Helper function to recursively search for prisma files
-    function searchPrismaFile(dir: string, fileName: string): string | null {
-        // First try direct path
-        const directPath = `${dir}/${fileName}`;
-        if (tree.exists(directPath)) {
-            return directPath;
-        }
+  // 1. 명시적으로 지정된 경로가 있으면 확인
+  if (explicitPath && tree.exists(explicitPath)) {
+    context.logger.info(`✅ Found prisma file at: ${explicitPath}`);
+    return explicitPath;
+  }
 
-        // Then try nested structure: dir/name/name.prisma
-        const nestedPath = `${dir}/${strings.dasherize(String(moduleName))}/${fileName}`;
-        if (tree.exists(nestedPath)) {
-            return nestedPath;
-        }
+  const targetFileName = `${moduleName.toLowerCase()}.prisma`;
 
-        // Finally, recursively search all subdirectories
-        try {
-            const dirObj = tree.getDir(dir);
-            for (const subdir of dirObj.subdirs) {
-                const subPath = `${dir}/${subdir}`;
-                const result = searchPrismaFile(subPath, fileName);
-                if (result) {
-                    return result;
-                }
-            }
-        } catch (e) {
-            // Directory doesn't exist or can't be read
-            return null;
-        }
-
-        return null;
+  // 2. 설정된 디렉토리들에서 재귀 검색
+  for (const searchDir of config.searchDirectories) {
+    const foundPath = searchPrismaFileRecursively(
+      tree,
+      searchDir,
+      targetFileName
+    );
+    if (foundPath) {
+      context.logger.info(`✅ Found module-specific prisma file: ${foundPath}`);
+      return foundPath;
     }
+  }
 
-    const prismaPath = searchPrismaFile(prismaDir, prismaFileName);
+  // 3. 통합 prisma 스키마 파일 확인
+  const commonPaths = [
+    config.defaultPrismaPath,
+    "prisma/prisma.schema",
+    "schema.prisma",
+  ];
 
-    if (prismaPath) {
-        context.logger.info(`Found prisma file: ${prismaPath}`);
-    } else {
-        context.logger.info(
-            `Prisma schema not found. Searched for '${prismaFileName}' in prisma directory and subdirectories.`
-        );
-        listAvailablePrismaFiles(tree, context, prismaDir, prismaFileName);
+  for (const path of commonPaths) {
+    if (tree.exists(path)) {
+      context.logger.info(`✅ Found common prisma file: ${path}`);
+      return path;
     }
+  }
 
-    return prismaPath;
+  const searchDirs = config.searchDirectories
+    .map((dir) => `${dir}/**/${targetFileName}`)
+    .join("\n  - ");
+  context.logger.warn(
+    `⚠️  No prisma file found for module '${moduleName}'. Tried:
+  - ${searchDirs} (recursive search)
+  - ${config.defaultPrismaPath}
+  - schema.prisma`
+  );
+  return null;
 }
 
 /**
- * 사용 가능한 모든 prisma 파일을 나열합니다 (디버깅용)
+ * 디렉토리를 재귀적으로 탐색하여 특정 파일을 찾습니다.
+ * 설정된 제외 디렉토리는 스킵합니다.
  */
-function listAvailablePrismaFiles(
-    tree: Tree,
-    context: SchematicContext,
-    prismaDir: string,
-    targetFileName: string
-): void {
-    function listPrismaFiles(dir: string, depth = 0): string[] {
-        const files: string[] = [];
-        try {
-            const dirObj = tree.getDir(dir);
-            const prismaFiles = dirObj.subfiles.filter(file => file.endsWith('.prisma'));
-            files.push(...prismaFiles.map(file => `${dir}/${file}`));
+function searchPrismaFileRecursively(
+  tree: Tree,
+  dirPath: string,
+  targetFileName: string
+): string | null {
+  const config = getConfig();
 
-            // Recursively search subdirectories (limit depth to avoid infinite loops)
-            if (depth < 3) {
-                for (const subdir of dirObj.subdirs) {
-                    files.push(...listPrismaFiles(`${dir}/${subdir}`, depth + 1));
-                }
-            }
-        } catch (e) {
-            // Directory doesn't exist or can't be read
-        }
-        return files;
+  // 디렉토리가 존재하지 않으면 null 반환
+  const dir = tree.getDir(dirPath);
+  if (!dir) {
+    return null;
+  }
+
+  // 현재 디렉토리에서 파일 검색
+  const directPath = `${dirPath}/${targetFileName}`;
+  if (tree.exists(directPath)) {
+    return directPath;
+  }
+
+  // 하위 디렉토리 재귀 검색 (제외 목록 필터링)
+  for (const subdir of dir.subdirs) {
+    // 제외 디렉토리는 스킵
+    if (config.excludedDirectories.has(subdir)) {
+      continue;
     }
 
-    const allPrismaFiles = listPrismaFiles(prismaDir);
-    if (allPrismaFiles.length > 0) {
-        context.logger.info(`Available prisma files: ${allPrismaFiles.join(', ')}`);
-        context.logger.info(`Looking for: ${targetFileName}`);
-    } else {
-        context.logger.info(`No prisma directory or files found. Skipping prisma-driven fields.`);
+    const result = searchPrismaFileRecursively(
+      tree,
+      `${dirPath}/${subdir}`,
+      targetFileName
+    );
+    if (result) {
+      return result;
     }
+  }
+
+  return null;
 }
 

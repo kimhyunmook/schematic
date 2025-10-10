@@ -8,3 +8,4 @@ import { <%= classify(name) %>Controller } from "./controllers/<%= dasherize(nam
   exports: [<%= classify(name) %>Service],
 })
 export class <%= classify(name) %>Module {}
+

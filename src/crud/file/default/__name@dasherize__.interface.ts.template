@@ -19,3 +19,4 @@ export type I<%= classify(name) %>FindMany = <%= classify(name) %>FindManyDto
 
 /** Update */
 export type I<%= classify(name) %>Update = <%= classify(name) %>UpdateDto
+

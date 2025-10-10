@@ -17,3 +17,4 @@ export class <%= classify(name) %>CreateDto
     optional: [<%= optionalFields.join(", ") %>],
   })
   implements I<%= classify(name) %>Create {}
+

@@ -1,19 +1,31 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "prisma",
+  "$id": "crud-module",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
-      "description": "The name of the module (will look for prisma/[name].prisma file)",
-      "x-prompt": "What is the name of the module?"
+      "description": "모듈 이름",
+      "x-prompt": "모듈 이름을 입력하세요:"
     },
     "path": {
       "type": "string",
-      "description": "Where to create the files",
+      "description": "파일을 생성할 경로",
       "default": "src/resources",
-      "x-prompt": "In which folder do you want to generate?"
+      "x-prompt": "어디에 파일을 생성할까요?"
+    },
+    "prismaPath": {
+      "type": "string",
+      "description": "대상 프로젝트의 Prisma 스키마 파일 경로",
+      "default": "prisma/schema.prisma"
+    },
+    "domain": {
+      "type": "string",
+      "description": "도메인 템플릿 타입",
+      "default": "default",
+      "enum": ["default"],
+      "x-prompt": "템플릿 도메인을 선택해주세요?"
     }
   },
-  "required": ["name"]
+  "required": ["name", "domain"]
 }

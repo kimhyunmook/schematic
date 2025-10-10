@@ -14,3 +14,4 @@ export class <%= classify(name) %>FindUniqueResponseDto extends ResponseDto {
 export class <%= classify(name) %>FindManyResponseDto extends ListResponseDto {
   data: <%= classify(name) %>ResponseData[];
 }
+

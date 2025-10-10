@@ -67,3 +67,4 @@ export class <%= classify(name) %>Model implements <%= classify(name) %> {
 <% }); %>
 <% } %>
 }
+

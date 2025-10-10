@@ -2,6 +2,7 @@ import { Tree, SchematicContext } from "@angular-devkit/schematics";
 
 export interface PackageConfig {
     path?: string;
+    prismaPath?: string;
 }
 
 /**
@@ -28,6 +29,7 @@ export function parsePackageConfig(
                 const crudCfg = rootCfg.crudModule || rootCfg.crud || rootCfg;
                 if (crudCfg && typeof crudCfg === "object") {
                     packageConfig.path = crudCfg.path;
+                    packageConfig.prismaPath = crudCfg.prismaPath;
                 }
             }
         } catch (e) {

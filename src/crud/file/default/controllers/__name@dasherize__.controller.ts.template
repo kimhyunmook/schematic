@@ -55,3 +55,4 @@ export class <%= classify(name) %>Controller extends CommonController {
     return this.responseData(this.DELETE);
   }
 }
+
