@@ -1,0 +1,29 @@
+import { PickType } from "@nestjs/swagger";
+import { <%= classify(name) %>Model } from "../../models/<%= dasherize(name) %>.model";
+import {
+  I<%= classify(name) %>FindUnique,
+  I<%= classify(name) %>FindMany,
+} from "../../<%= dasherize(name) %>.interface";
+import { createPaginationDto } from "src/common/helpers/find-pagination.dto";
+import { CREATED_AT } from "src/common/enums/created-at.enum";
+import { IsOptional, IsBoolean } from "class-validator";
+import { Type } from "class-transformer";
+import { ApiProperty } from "@nestjs/swagger";
+
+/** Unique */
+export class <%= classify(name) %>FindUniqueDto
+  extends PickType(<%= classify(name) %>Model, ["id"])
+  implements I<%= classify(name) %>FindUnique {}
+
+/** List (Admin: 삭제된 데이터 포함 옵션) */
+export class <%= classify(name) %>FindManyDto
+  extends createPaginationDto([CREATED_AT])
+  implements I<%= classify(name) %>FindMany {
+  
+  @ApiProperty({ description: '삭제된 데이터 포함 여부', required: false })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  includeDeleted?: boolean;
+}
+

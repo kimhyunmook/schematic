@@ -1,0 +1,95 @@
+import { Injectable } from "@nestjs/common";
+import {
+  I<%= classify(name) %>Create,
+  I<%= classify(name) %>FindUnique,
+  I<%= classify(name) %>FindMany,
+  I<%= classify(name) %>Update,
+} from "./<%= dasherize(name) %>.interface";
+import { PrismaService } from "src/core/prisma/prisma.service";
+import { CommonService } from "src/common/utils/common.service";
+import { createPaginationOptions } from "src/common/helpers/pagination.helper";
+import { Prisma } from "@prisma/client";
+
+@Injectable()
+export class <%= classify(name) %>Service extends CommonService {
+  public static readonly MODULE_NAME = "<%= classify(name) %> (Admin)";
+
+  constructor(private readonly prisma: PrismaService) {
+    super({ NAME: <%= classify(name) %>Service.MODULE_NAME });
+  }
+
+  async create(data: I<%= classify(name) %>Create) {
+    return this.prisma.<%= camelize(name) %>.create({ data });
+  }
+
+  async findUnique(data: I<%= classify(name) %>FindUnique) {
+    return this.prisma.<%= camelize(name) %>.findUnique({
+      where: {
+        ...data,
+      },
+    });
+  }
+
+  async fidnMany({ page, take, sort, includeDeleted, ...rest }: I<%= classify(name) %>FindMany & { includeDeleted?: boolean }) {
+    const option: Prisma.<%= classify(name) %>FindManyArgs = {
+      where: { 
+        ...rest,
+        // Admin: 삭제된 데이터도 포함 가능
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
+      ...createPaginationOptions({ page, take, sort }),
+    };
+
+    const [resources, totalCount] = await this.prisma.$transaction([
+      this.prisma.<%= camelize(name) %>.findMany(option),
+      this.prisma.<%= camelize(name) %>.count({ where: option.where }),
+    ]);
+
+    const meta = this.getMetaData({
+      page,
+      take,
+      totalCount,
+    });
+
+    return { resources, meta };
+  }
+
+  async update(data: I<%= classify(name) %>Update) {
+    const { id, ...rest } = data;
+    return this.prisma.<%= camelize(name) %>.update({
+      where: {
+        id,
+      },
+      data: {
+        ...rest,
+      },
+    });
+  }
+
+  async softDelete(id: number) {
+    return this.prisma.<%= camelize(name) %>.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+
+  // Admin: 완전 삭제 기능 추가
+  async hardDelete(id: number) {
+    return this.prisma.<%= camelize(name) %>.delete({
+      where: { id },
+    });
+  }
+
+  // Admin: 삭제된 데이터 복구
+  async restore(id: number) {
+    return this.prisma.<%= camelize(name) %>.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+}
+

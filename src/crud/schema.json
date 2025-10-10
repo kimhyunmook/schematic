@@ -23,7 +23,7 @@
       "type": "string",
       "description": "도메인 템플릿 타입",
       "default": "default",
-      "enum": ["default"],
+      "enum": ["default", "admin"],
       "x-prompt": "템플릿 도메인을 선택해주세요?"
     }
   },

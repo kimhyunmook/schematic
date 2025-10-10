@@ -1,0 +1,70 @@
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsOptional, IsDate, IsBoolean, IsNumber, IsEnum } from "class-validator";
+import { Type } from "class-transformer";
+import { $Enums, <%= classify(name) %> } from "@prisma/client";
+
+export class <%= classify(name) %>Model implements <%= classify(name) %> {
+<% if (prismaModel && prismaModel.fields && prismaModel.fields.length) { %>
+<% prismaModel.fields.forEach(function(field){ 
+  const isArray = String(field.type).endsWith('[]');
+  const baseType = isArray ? String(field.type).slice(0, -2) : String(field.type);
+  function tsType(t){
+    switch (t) {
+      case 'String': return 'string';
+      case 'Int':
+      case 'Float':
+      case 'Decimal': return 'number'
+      case 'BigInt': return 'bigint';
+      case 'Boolean': return 'boolean';
+      case 'DateTime': return 'Date';
+      case 'Json': return 'any';
+      default: return `$Enums.${t}`;
+    }
+  }
+  function isEnum(t){
+    switch (t) {
+      case 'String':
+      case 'Int':
+      case 'Float':
+      case 'Decimal':
+      case 'BigInt':
+      case 'Boolean':
+      case 'DateTime':
+      case 'Json':
+      case 'Bytes':
+        return false;
+      case 'Bytes': return 'string';
+      default:
+        // Non-scalar and not relation (since arrays/relations filtered) → treat as enum string
+        return true;
+    }
+  }
+  function swaggerType(t){
+    switch (t) {
+      case 'String':
+      case 'Bytes':
+      case 'DateTime': return 'String';
+      case 'Int':
+      case 'Float':
+      case 'Decimal':
+      case 'BigInt': return 'Number';
+      case 'Boolean': return 'Boolean';
+      case 'Json': return 'Object';
+      default: return 'String';
+    }
+  }
+%>
+  @ApiProperty({ description: '<%= field.description || "" %>'<% if (!isEnum(baseType)) { %>, type: <%= baseType === 'DateTime' ? 'Date' : swaggerType(baseType) %><% } %>, nullable: <%= !!field.optional %><% if (isArray) { %>, isArray: true<% } %><% if (isEnum(baseType)) { %>, enum: $Enums.<%= baseType %><% } %> })
+<% if (field.optional) { %>  @IsOptional()
+<% } %><% if (isEnum(baseType)) { %>  @IsEnum($Enums.<%= baseType %>)
+<% } else if (tsType(baseType) === 'string') { %>  @IsString()
+<% } else if (tsType(baseType) === 'number') { %>  @IsNumber()
+  @Type(() => Number)
+<% } else if (tsType(baseType) === 'boolean') { %>  @IsBoolean()
+<% } else if (tsType(baseType) === 'Date') { %>  @IsDate()
+  @Type(() => Date)
+<% } %>  <%= field.name %>: <%= tsType(baseType) %><% if (isArray) { %>[]<% } %><% if (field.optional) { %> | null<% } %>;
+<% }); %>
+<% } %>
+}
+

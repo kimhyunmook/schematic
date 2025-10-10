@@ -1,0 +1,21 @@
+import { <%= classify(name) %>CreateDto } from "./dto/request/<%= dasherize(name) %>-create.dto";
+import { <%= classify(name) %>FindManyDto, <%= classify(name) %>FindUniqueDto } from "./dto/request/<%= dasherize(name) %>-find.dto";
+import { <%= classify(name) %>UpdateDto } from "./dto/request/<%= dasherize(name) %>-update.dto";
+
+/**
+ * Service layer interfaces (Admin)
+ * 관리자용 서비스 계층 인터페이스
+ */
+
+/** Create */
+export type I<%= classify(name) %>Create = <%= classify(name) %>CreateDto
+
+/** Find */
+export type I<%= classify(name) %>FindUnique = <%= classify(name) %>FindUniqueDto
+
+export type I<%= classify(name) %>FindMany = <%= classify(name) %>FindManyDto
+
+
+/** Update */
+export type I<%= classify(name) %>Update = <%= classify(name) %>UpdateDto
+
