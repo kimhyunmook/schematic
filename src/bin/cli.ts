@@ -196,7 +196,9 @@ async function main() {
     if (arg?.startsWith("--")) {
       const [key, value] = arg.slice(2).split("=");
       if (key && value) {
-        options[key] = value;
+        // kebab-case를 camelCase로 변환
+        const camelKey = key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+        options[camelKey] = value;
       }
     }
   }
@@ -326,7 +328,7 @@ async function main() {
     }
 
     if (options["prismaPath"]) {
-      schematicCmd += ` --prismaPath=${options["prismaPath"]}`;
+      schematicCmd += ` --prisma-path=${options["prismaPath"]}`;
     }
 
     schematicCmd += " --dry-run=false --verbose=false";

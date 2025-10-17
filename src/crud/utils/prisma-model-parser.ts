@@ -37,19 +37,61 @@ export function parsePrismaModel(
     // 파일 상단의 /// 주석에서 MODULE_NAME 추출
     const moduleName = extractModuleNameFromComment(text);
 
-    // 모든 모델 블록 찾기
-    const allModelRegex = /model\s+(\w+)\s+\{([\s\S]*?)\}/gm;
+    // 모든 모델 블록 찾기 - 더 안정적인 파싱 방법
     const models: Array<{ name: string; body: string }> = [];
-    let match;
 
-    while ((match = allModelRegex.exec(text)) !== null) {
-        if (match[1] && match[2]) {
-            models.push({
-                name: match[1],
-                body: match[2],
-            });
+    // 디버깅을 위한 로그 추가
+    context.logger.debug(`Parsing prisma file: ${prismaPath}`);
+    context.logger.debug(`File content length: ${text.length}`);
+
+    // model 키워드로 시작하는 모든 라인 찾기
+    const lines = text.split(/\r?\n/);
+    let currentModel: { name: string; body: string } | null = null;
+    let braceCount = 0;
+    let inModel = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        const trimmed = line.trim();
+
+        // model 키워드로 시작하는 라인 찾기
+        const modelMatch = trimmed.match(/^model\s+(\w+)\s*\{/);
+        if (modelMatch) {
+            if (currentModel) {
+                // 이전 모델이 완료되지 않았다면 저장
+                models.push(currentModel);
+            }
+            currentModel = {
+                name: modelMatch[1] || '',
+                body: ''
+            };
+            braceCount = 1;
+            inModel = true;
+            context.logger.debug(`Found model: ${modelMatch[1]}`);
+            continue;
+        }
+
+        // 모델 내부에 있을 때 중괄호 카운트
+        if (inModel && currentModel && line) {
+            currentModel.body += line + '\n';
+
+            // 중괄호 카운트
+            for (const char of line) {
+                if (char === '{') braceCount++;
+                if (char === '}') braceCount--;
+            }
+
+            // 중괄호가 모두 닫혔으면 모델 완료
+            if (braceCount === 0) {
+                models.push(currentModel);
+                currentModel = null;
+                inModel = false;
+            }
         }
     }
+
+    context.logger.debug(`Total models found: ${models.length}`);
 
     if (models.length === 0) {
         context.logger.warn(`No model block found in ${prismaPath}`);

@@ -30,7 +30,7 @@ export function loadConfig(): SchematicConfig {
         .map((dir) => dir.trim())
         .filter((dir) => dir.length > 0)
     ),
-    searchDirectories: (process.env["CRUD_SEARCH_DIRECTORIES"] || "prisma,src")
+    searchDirectories: (process.env["CRUD_SEARCH_DIRECTORIES"] || "prisma,src,database,db,schemas")
       .split(",")
       .map((dir) => dir.trim())
       .filter((dir) => dir.length > 0),
