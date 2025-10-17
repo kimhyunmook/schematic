@@ -30,7 +30,7 @@ export class <%= classify(name) %>Controller extends CommonController {
   async findMany(
     @Query() query: <%= classify(name) %>FindManyDto,
   ): Promise<<%= classify(name) %>FindManyResponseDto> {
-    const { resources, meta } = await this.service.fidnMany(query);
+    const { resources, meta } = await this.service.findMany(query);
     return this.responseData(this.FIND_MANY, resources, meta);
   }
 

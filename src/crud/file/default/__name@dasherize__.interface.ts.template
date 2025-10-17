@@ -9,14 +9,13 @@ import { <%= classify(name) %>UpdateDto } from "./dto/request/<%= dasherize(name
  */
 
 /** Create */
-export type I<%= classify(name) %>Create = <%= classify(name) %>CreateDto
+export type I<%= classify(name) %>Create = <%= classify(name) %>CreateDto;
 
 /** Find */
-export type I<%= classify(name) %>FindUnique = <%= classify(name) %>FindUniqueDto
+export type I<%= classify(name) %>FindUnique = <%= classify(name) %>FindUniqueDto;
 
-export type I<%= classify(name) %>FindMany = <%= classify(name) %>FindManyDto
-
+export type I<%= classify(name) %>FindMany = <%= classify(name) %>FindManyDto;
 
 /** Update */
-export type I<%= classify(name) %>Update = <%= classify(name) %>UpdateDto
+export type I<%= classify(name) %>Update = <%= classify(name) %>UpdateDto;
 

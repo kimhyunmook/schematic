@@ -13,7 +13,7 @@ export class <%= classify(name) %>Model implements <%= classify(name) %> {
       case 'String': return 'string';
       case 'Int':
       case 'Float':
-      case 'Decimal': return 'number'
+      case 'Decimal': return 'number';
       case 'BigInt': return 'bigint';
       case 'Boolean': return 'boolean';
       case 'DateTime': return 'Date';

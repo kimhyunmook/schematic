@@ -12,7 +12,7 @@ import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class <%= classify(name) %>Service extends CommonService {
-  public static readonly MODULE_NAME = "<%= classify(name) %>";
+  public static readonly MODULE_NAME = "<%= MODULE_NAME %>";
 
   constructor(private readonly prisma: PrismaService) {
     super({ NAME: <%= classify(name) %>Service.MODULE_NAME });
@@ -30,7 +30,7 @@ export class <%= classify(name) %>Service extends CommonService {
     });
   }
 
-  async fidnMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
+  async findMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
     const option: Prisma.<%= classify(name) %>FindManyArgs = {
       where: { ...rest },
       ...createPaginationOptions({ page, take, sort }),

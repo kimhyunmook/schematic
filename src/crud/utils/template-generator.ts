@@ -33,6 +33,8 @@ export function generateCrudTemplate(
             ...options,
             ...strings, // dasherize, classify, camelize 등
             prismaModel,
+            // 프리즈마 파일에서 추출한 moduleName을 MODULE_NAME 변수로 전달
+            MODULE_NAME: prismaModel?.moduleName || strings.classify(String(options.name)),
         }),
         move(`${resolvedPath}/${strings.dasherize(String(options.name))}`),
         forEach((fileEntry: FileEntry) => {

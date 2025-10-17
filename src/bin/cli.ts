@@ -5,9 +5,27 @@ import { join } from "path";
 import { existsSync } from "fs";
 import { config as loadEnv } from "dotenv";
 import chalk from "chalk";
+import * as readline from "readline";
 
 // .env 파일 로드 (있으면)
 loadEnv();
+
+/**
+ * 사용자로부터 입력을 받는 함수
+ */
+function askUserInput(question: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -52,6 +70,20 @@ async function main() {
     console.log(chalk.white("도메인:"));
     console.log(
       chalk.magenta("  사용 가능: default, custom 등 ") + chalk.dim("(기본: default)")
+    );
+    console.log("");
+    console.log(chalk.white("환경변수 설정 (.env 파일):"));
+    console.log(
+      chalk.cyan("  SC_DEFAULT_PATH") +
+      chalk.gray("=src/resources        기본 설치 경로")
+    );
+    console.log(
+      chalk.cyan("  SC_DEFAULT_DOMAIN") +
+      chalk.gray("=default              기본 도메인")
+    );
+    console.log(
+      chalk.cyan("  SC_DEFAULT_PRISMA_PATH") +
+      chalk.gray("=prisma/schema.prisma 기본 Prisma 경로")
     );
     console.log("");
     console.log(chalk.gray("도움말: ") + chalk.cyan("schematic --help"));
@@ -101,6 +133,20 @@ async function main() {
       chalk.magenta("  사용 가능: default, custom 등 ") + chalk.dim("(기본: default)")
     );
     console.log("");
+    console.log(chalk.white("환경변수 설정 (.env 파일):"));
+    console.log(
+      chalk.cyan("  SC_DEFAULT_PATH") +
+      chalk.gray("=src/resources        기본 설치 경로")
+    );
+    console.log(
+      chalk.cyan("  SC_DEFAULT_DOMAIN") +
+      chalk.gray("=default              기본 도메인")
+    );
+    console.log(
+      chalk.cyan("  SC_DEFAULT_PRISMA_PATH") +
+      chalk.gray("=prisma/schema.prisma 기본 Prisma 경로")
+    );
+    console.log("");
     console.log(chalk.white.bold("특징:"));
     console.log(chalk.green("  ✅ 도메인별 템플릿 지원"));
     console.log(chalk.green("  ✅ 환경변수 설정 (.env)"));
@@ -146,8 +192,24 @@ async function main() {
     domain = process.env["SC_DEFAULT_DOMAIN"];
   }
 
-  if (!options["path"] && process.env["SC_DEFAULT_PATH"]) {
-    options["path"] = process.env["SC_DEFAULT_PATH"];
+  // 설치 경로 설정: CLI 인자 > 환경변수 > 사용자 입력
+  if (!options["path"]) {
+    if (process.env["SC_DEFAULT_PATH"]) {
+      options["path"] = process.env["SC_DEFAULT_PATH"];
+    } else {
+      // 환경변수가 없으면 사용자에게 입력받기
+      console.log("");
+      console.log(chalk.yellow("📁 설치 디렉토리가 설정되지 않았습니다."));
+      console.log(chalk.dim("   환경변수 SC_DEFAULT_PATH를 설정하거나 아래에 입력해주세요."));
+
+      const userPath = await askUserInput(
+        chalk.cyan("   설치할 디렉토리 경로를 입력하세요") +
+        chalk.dim(" (기본값: src/resources): ")
+      );
+
+      options["path"] = userPath || "src/resources";
+      console.log(chalk.green(`   ✅ 설치 경로: ${options["path"]}`));
+    }
   }
 
   // Check if we're in a NestJS project
