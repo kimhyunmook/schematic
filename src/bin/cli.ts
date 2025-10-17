@@ -51,8 +51,12 @@ async function main() {
       chalk.dim("# default 도메인으로 생성")
     );
     console.log(
-      chalk.gray("  crud Order custom           ") +
-      chalk.dim("# custom 도메인으로 생성")
+      chalk.gray("  crud Order admin           ") +
+      chalk.dim("# admin 도메인으로 생성")
+    );
+    console.log(
+      chalk.gray("  crud Target children         ") +
+      chalk.dim("# children 모듈로 생성 (부모 경로 입력)")
     );
     console.log("");
     console.log(chalk.white("옵션:"));
@@ -69,20 +73,20 @@ async function main() {
     console.log("");
     console.log(chalk.white("도메인:"));
     console.log(
-      chalk.magenta("  사용 가능: default, custom 등 ") + chalk.dim("(기본: default)")
+      chalk.magenta("  사용 가능: default, admin, children ") + chalk.dim("(기본: default)")
     );
     console.log("");
     console.log(chalk.white("환경변수 설정 (.env 파일):"));
     console.log(
-      chalk.cyan("  SC_DEFAULT_PATH") +
+      chalk.cyan("  CRUD_DEFAULT_PATH") +
       chalk.gray("=src/resources        기본 설치 경로")
     );
     console.log(
-      chalk.cyan("  SC_DEFAULT_DOMAIN") +
+      chalk.cyan("  CRUD_DEFAULT_DOMAIN") +
       chalk.gray("=default              기본 도메인")
     );
     console.log(
-      chalk.cyan("  SC_DEFAULT_PRISMA_PATH") +
+      chalk.cyan("  CRUD_DEFAULT_PRISMA_PATH") +
       chalk.gray("=prisma/schema.prisma 기본 Prisma 경로")
     );
     console.log("");
@@ -114,7 +118,10 @@ async function main() {
       chalk.gray("  crud Product default            ") + chalk.dim("# default 도메인")
     );
     console.log(
-      chalk.gray("  crud Order custom               ") + chalk.dim("# custom 도메인")
+      chalk.gray("  crud Order admin               ") + chalk.dim("# admin 도메인")
+    );
+    console.log(
+      chalk.gray("  crud Target children            ") + chalk.dim("# children 모듈 (부모 경로 입력)")
     );
     console.log(chalk.gray("  crud Payment default --path=src/api"));
     console.log("");
@@ -130,20 +137,20 @@ async function main() {
     console.log("");
     console.log(chalk.white("도메인:"));
     console.log(
-      chalk.magenta("  사용 가능: default, custom 등 ") + chalk.dim("(기본: default)")
+      chalk.magenta("  사용 가능: default, admin, children ") + chalk.dim("(기본: default)")
     );
     console.log("");
     console.log(chalk.white("환경변수 설정 (.env 파일):"));
     console.log(
-      chalk.cyan("  SC_DEFAULT_PATH") +
+      chalk.cyan("  CRUD_DEFAULT_PATH") +
       chalk.gray("=src/resources        기본 설치 경로")
     );
     console.log(
-      chalk.cyan("  SC_DEFAULT_DOMAIN") +
+      chalk.cyan("  CRUD_DEFAULT_DOMAIN") +
       chalk.gray("=default              기본 도메인")
     );
     console.log(
-      chalk.cyan("  SC_DEFAULT_PRISMA_PATH") +
+      chalk.cyan("  CRUD_DEFAULT_PRISMA_PATH") +
       chalk.gray("=prisma/schema.prisma 기본 Prisma 경로")
     );
     console.log("");
@@ -169,10 +176,17 @@ async function main() {
   // 두 번째 인자가 도메인인지 확인 (--로 시작하지 않으면 도메인)
   let domain: string | undefined = undefined;
   let optionStartIndex = 1;
+  let isChildrenModule = false;
 
   if (args.length > 1 && args[1] && !args[1].startsWith("--")) {
     domain = args[1];
     optionStartIndex = 2;
+  }
+
+  // children 모듈 확인
+  if (domain === "children") {
+    isChildrenModule = true;
+    // domain은 "children"으로 유지하여 템플릿 생성기에서 올바른 템플릿을 선택하도록 함
   }
 
   // 나머지 인자에서 옵션 파싱
@@ -188,19 +202,19 @@ async function main() {
   }
 
   // .env에서 기본값 가져오기 (CLI 인자가 없을 때만)
-  if (!domain && process.env["SC_DEFAULT_DOMAIN"]) {
-    domain = process.env["SC_DEFAULT_DOMAIN"];
+  if (!domain && process.env["CRUD_DEFAULT_DOMAIN"]) {
+    domain = process.env["CRUD_DEFAULT_DOMAIN"];
   }
 
   // 설치 경로 설정: CLI 인자 > 환경변수 > 사용자 입력
   if (!options["path"]) {
-    if (process.env["SC_DEFAULT_PATH"]) {
-      options["path"] = process.env["SC_DEFAULT_PATH"];
+    if (process.env["CRUD_DEFAULT_PATH"]) {
+      options["path"] = process.env["CRUD_DEFAULT_PATH"];
     } else {
       // 환경변수가 없으면 사용자에게 입력받기
       console.log("");
       console.log(chalk.yellow("📁 설치 디렉토리가 설정되지 않았습니다."));
-      console.log(chalk.dim("   환경변수 SC_DEFAULT_PATH를 설정하거나 아래에 입력해주세요."));
+      console.log(chalk.dim("   환경변수 CRUD_DEFAULT_PATH를 설정하거나 아래에 입력해주세요."));
 
       const userPath = await askUserInput(
         chalk.cyan("   설치할 디렉토리 경로를 입력하세요") +
@@ -209,6 +223,27 @@ async function main() {
 
       options["path"] = userPath || "src/resources";
       console.log(chalk.green(`   ✅ 설치 경로: ${options["path"]}`));
+    }
+  }
+
+  // children 모듈인 경우 추가 경로 입력받기
+  if (isChildrenModule) {
+    console.log("");
+    console.log(chalk.magenta("🌳 Children 모듈을 생성합니다."));
+    console.log(chalk.dim("   부모 모듈의 경로를 입력해주세요."));
+
+    const parentPath = await askUserInput(
+      chalk.cyan("   부모 모듈 경로를 입력하세요") +
+      chalk.dim(" (예: pet): ")
+    );
+
+    if (parentPath) {
+      // 기존 경로에 부모 모듈 경로와 children 추가
+      options["path"] = `${options["path"]}/${parentPath}/children`;
+      console.log(chalk.green(`   ✅ Children 모듈 경로: ${options["path"]}`));
+    } else {
+      console.log(chalk.red("   ❌ 부모 모듈 경로가 필요합니다."));
+      process.exit(1);
     }
   }
 
@@ -257,7 +292,9 @@ async function main() {
 
     const baseMessage = domain
       ? chalk.cyan.bold(`🔄 ${modelName}`) + chalk.white(" CRUD 모듈을 생성하고 있습니다") + chalk.magenta(` (도메인: ${domain})`)
-      : chalk.cyan.bold(`🔄 ${modelName}`) + chalk.white(" CRUD 모듈을 생성하고 있습니다");
+      : isChildrenModule
+        ? chalk.cyan.bold(`🔄 ${modelName}`) + chalk.white(" Children CRUD 모듈을 생성하고 있습니다") + chalk.magenta(" (children)")
+        : chalk.cyan.bold(`🔄 ${modelName}`) + chalk.white(" CRUD 모듈을 생성하고 있습니다");
 
     console.log("");
     process.stdout.write(baseMessage + chalk.white(dots[0]));

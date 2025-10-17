@@ -1,0 +1,74 @@
+import { Injectable } from "@nestjs/common";
+import {
+  I<%= classify(name) %>Create,
+  I<%= classify(name) %>FindUnique,
+  I<%= classify(name) %>FindMany,
+  I<%= classify(name) %>Update,
+} from "./<%= dasherize(name) %>.interface";
+import { PrismaService } from "src/core/prisma/prisma.service";
+import { CommonService } from "src/common/utils/common.service";
+import { createPaginationOptions } from "src/common/helpers/pagination.helper";
+import { Prisma } from "@prisma/client";
+
+@Injectable()
+export class <%= classify(name) %>Service extends CommonService {
+  public static readonly MODULE_NAME = "<%= MODULE_NAME %> (Children)";
+
+  constructor(private readonly prisma: PrismaService) {
+    super({ NAME: <%= classify(name) %>Service.MODULE_NAME });
+  }
+
+  async create(data: I<%= classify(name) %>Create) {
+    return this.prisma.<%= camelize(name) %>.create({ data });
+  }
+
+  async findUnique(data: I<%= classify(name) %>FindUnique) {
+    return this.prisma.<%= camelize(name) %>.findUnique({
+      where: {
+        ...data,
+      },
+    });
+  }
+
+  async findMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
+    const option: Prisma.<%= classify(name) %>FindManyArgs = {
+      where: { ...rest },
+      ...createPaginationOptions({ page, take, sort }),
+    };
+
+    const [resources, totalCount] = await this.prisma.$transaction([
+      this.prisma.<%= camelize(name) %>.findMany(option),
+      this.prisma.<%= camelize(name) %>.count({ where: option.where }),
+    ]);
+
+    const meta = this.getMetaData({
+      page,
+      take,
+      totalCount,
+    });
+
+    return { resources, meta };
+  }
+
+  async update(data: I<%= classify(name) %>Update) {
+    const { id, ...rest } = data;
+    return this.prisma.<%= camelize(name) %>.update({
+      where: {
+        id,
+      },
+      data: {
+        ...rest,
+      },
+    });
+  }
+
+  async softDelete(id: number) {
+    return this.prisma.<%= camelize(name) %>.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+  }
+}
+

@@ -17,20 +17,20 @@ export interface SchematicConfig {
 export function loadConfig(): SchematicConfig {
   // 기본값 설정
   const config: SchematicConfig = {
-    defaultDomain: process.env["SC_DEFAULT_DOMAIN"] || "default",
-    defaultPath: process.env["SC_DEFAULT_PATH"] || "src/resources",
+    defaultDomain: process.env["CRUD_DEFAULT_DOMAIN"] || "default",
+    defaultPath: process.env["CRUD_DEFAULT_PATH"] || "src/resources",
     defaultPrismaPath:
-      process.env["SC_DEFAULT_PRISMA_PATH"] || "prisma/schema.prisma",
+      process.env["CRUD_DEFAULT_PRISMA_PATH"] || "prisma/schema.prisma",
     excludedDirectories: new Set(
       (
-        process.env["SC_EXCLUDED_DIRECTORIES"] ||
+        process.env["CRUD_EXCLUDED_DIRECTORIES"] ||
         "node_modules,dist,.git,.next,.nuxt,build,out,coverage,.turbo,.cache"
       )
         .split(",")
         .map((dir) => dir.trim())
         .filter((dir) => dir.length > 0)
     ),
-    searchDirectories: (process.env["SC_SEARCH_DIRECTORIES"] || "prisma,src")
+    searchDirectories: (process.env["CRUD_SEARCH_DIRECTORIES"] || "prisma,src")
       .split(",")
       .map((dir) => dir.trim())
       .filter((dir) => dir.length > 0),
