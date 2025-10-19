@@ -41,6 +41,8 @@ export function crudModule(options: CrudSchema): Rule {
     const packageConfig = parsePackageConfig(tree, context);
 
     // 2. Find prisma file for the module
+    context.logger.debug(`🔍 Options prismaPath: ${options.prismaPath}`);
+    context.logger.debug(`🔍 PackageConfig prismaPath: ${packageConfig.prismaPath}`);
     const prismaPath = findPrismaFile(
       tree,
       context,

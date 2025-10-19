@@ -16,8 +16,7 @@
     },
     "prismaPath": {
       "type": "string",
-      "description": "대상 프로젝트의 Prisma 스키마 파일 경로",
-      "default": "prisma/schema.prisma"
+      "description": "대상 프로젝트의 Prisma 스키마 파일 경로"
     },
     "domain": {
       "type": "string",

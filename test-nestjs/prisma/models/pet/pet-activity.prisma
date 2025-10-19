@@ -1,0 +1,12 @@
+/// pet-activity
+model PetActivity {
+    id           String   @id @default(cuid())
+    petId        String
+    activityType String
+    description  String?
+    duration     Int? // minutes
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    @@map("pet_activities")
+}
