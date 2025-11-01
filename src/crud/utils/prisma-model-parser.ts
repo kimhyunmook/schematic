@@ -14,6 +14,7 @@ export interface PrismaModel {
     name: string;
     fields: PrismaModelField[];
     moduleName?: string;
+    enums?: string[]; // 스키마에 정의된 enum 타입 목록
 }
 
 /**
@@ -36,6 +37,10 @@ export function parsePrismaModel(
 
     // 파일 상단의 /// 주석에서 MODULE_NAME 추출
     const moduleName = extractModuleNameFromComment(text);
+
+    // 모든 enum 정의 찾기
+    const enums = extractEnums(text);
+    context.logger.debug(`Found enums: ${enums.join(", ") || "none"}`);
 
     // 모든 모델 블록 찾기
     const allModelRegex = /model\s+(\w+)\s+\{([\s\S]*?)\}/gm;
@@ -97,7 +102,8 @@ export function parsePrismaModel(
 
     const fields: PrismaModelField[] = parseModelFields(
         selectedModel.body,
-        context
+        context,
+        enums
     );
 
     context.logger.info(
@@ -110,7 +116,8 @@ export function parsePrismaModel(
 
     const result: PrismaModel = {
         name: selectedModel.name,
-        fields
+        fields,
+        enums: enums.length > 0 ? enums : undefined
     };
 
     if (moduleName) {
@@ -121,11 +128,61 @@ export function parsePrismaModel(
 }
 
 /**
+ * Prisma 스키마에서 enum 정의를 추출합니다.
+ * 중첩된 중괄호를 올바르게 처리합니다.
+ */
+function extractEnums(text: string): string[] {
+    const enums: string[] = [];
+    const lines = text.split(/\r?\n/);
+    let currentEnum: string | null = null;
+    let braceCount = 0;
+    let inEnum = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        const trimmed = line.trim();
+
+        // enum 키워드로 시작하는 라인 찾기
+        const enumMatch = trimmed.match(/^enum\s+(\w+)\s*\{/);
+        if (enumMatch) {
+            if (currentEnum) {
+                // 이전 enum이 완료되지 않았다면 저장
+                enums.push(currentEnum);
+            }
+            currentEnum = enumMatch[1];
+            braceCount = 1;
+            inEnum = true;
+            continue;
+        }
+
+        // enum 내부에 있을 때 중괄호 카운트
+        if (inEnum && currentEnum) {
+            // 중괄호 카운트
+            for (const char of line) {
+                if (char === '{') braceCount++;
+                if (char === '}') braceCount--;
+            }
+
+            // 중괄호가 모두 닫혔으면 enum 완료
+            if (braceCount === 0) {
+                enums.push(currentEnum);
+                currentEnum = null;
+                inEnum = false;
+            }
+        }
+    }
+
+    return enums;
+}
+
+/**
  * 모델 본문에서 필드들을 파싱합니다.
  */
 function parseModelFields(
     body: string,
-    context: SchematicContext
+    context: SchematicContext,
+    enums: string[] = []
 ): PrismaModelField[] {
     const fields: PrismaModelField[] = [];
     const lines = body.split(/\r?\n/);
@@ -188,12 +245,20 @@ function parseModelFields(
         // 베이스 타입 추출
         const baseType = getBaseType(fType);
 
-        // 릴레이션 타입 필드 스킵 (Prisma scalar 타입이 아닌 경우)
-        if (!scalarTypes.includes(fType) && !scalarTypes.includes(baseType)) {
+        // enum 타입 체크
+        const isEnumType = enums.includes(fType) || enums.includes(baseType);
+
+        // 릴레이션 타입 필드 스킵 (Prisma scalar 타입도 아니고 enum도 아닌 경우)
+        if (!scalarTypes.includes(fType) && !scalarTypes.includes(baseType) && !isEnumType) {
             context.logger.debug(
-                `Skipping non-scalar field: ${fName} (type: ${fType})`
+                `Skipping non-scalar/non-enum field: ${fName} (type: ${fType})`
             );
             continue;
+        }
+
+        // enum 타입인 경우 로깅
+        if (isEnumType) {
+            context.logger.debug(`Found enum field: ${fName} (type: ${fType})`);
         }
 
         // @id 속성 체크

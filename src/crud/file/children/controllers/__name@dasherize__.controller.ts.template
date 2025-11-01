@@ -1,12 +1,21 @@
 import { Body, Param, ParseIntPipe, Query } from "@nestjs/common";
+
 import { <%= classify(name) %>Service } from "../<%= dasherize(name) %>.service";
+
 import { NumberIdOnlyResponseDto, NullDataResponseDto } from "src/common/dto/response.dto";
+
 import { CommonController } from "src/common/utils/common.controller";
+
 import { ApiController } from "src/common/decorators/api-controller.decorator";
+
 import { ApiDocs } from "src/common/decorators/api-docs-option.decorator";
+
 import { <%= classify(name) %>CreateDto } from "../dto/request/<%= dasherize(name) %>-create.dto";
+
 import { <%= classify(name) %>UpdateDto } from "../dto/request/<%= dasherize(name) %>-update.dto";
+
 import { <%= classify(name) %>FindManyDto } from "../dto/request/<%= dasherize(name) %>-find.dto";
+
 import {
   <%= classify(name) %>FindManyResponseDto,
   <%= classify(name) %>FindUniqueResponseDto,
@@ -18,29 +27,38 @@ export class <%= classify(name) %>Controller extends CommonController {
     super(<%= classify(name) %>Service.MODULE_NAME);
   }
 
-  @ApiDocs({ endpoint: ":id", summary: `${<%= classify(name) %>Service.MODULE_NAME} 상세 조회` })
+  @ApiDocs({
+    method: "GET",
+    endpoint: ":id",
+    summary: `${<%= classify(name) %>Service.MODULE_NAME} 상세 조회`,
+  })
   async findUnique(
     @Param("id", ParseIntPipe) id: number,
   ): Promise<<%= classify(name) %>FindUniqueResponseDto> {
-    const res = await this.service.findUnique({ id });
+    const res = await this.service.findUniqueOrThrow(id);
     return this.responseData(this.FIND_UNIQUE, res);
   }
 
-  @ApiDocs({ summary: `${<%= classify(name) %>Service.MODULE_NAME} 목록 조회` })
-  async findMany(
-    @Query() query: <%= classify(name) %>FindManyDto,
-  ): Promise<<%= classify(name) %>FindManyResponseDto> {
+  @ApiDocs({ method: "GET", summary: `${<%= classify(name) %>Service.MODULE_NAME} 목록 조회` })
+  async findMany(@Query() query: <%= classify(name) %>FindManyDto): Promise<<%= classify(name) %>FindManyResponseDto> {
     const { resources, meta } = await this.service.findMany(query);
     return this.responseData(this.FIND_MANY, resources, meta);
   }
 
-  @ApiDocs({ method: "POST", summary: `${<%= classify(name) %>Service.MODULE_NAME} 생성` })
+  @ApiDocs({
+    method: "POST",
+    summary: `${<%= classify(name) %>Service.MODULE_NAME} 생성`,
+  })
   async create(@Body() body: <%= classify(name) %>CreateDto): Promise<NumberIdOnlyResponseDto> {
     const { id } = await this.service.create(body);
     return this.responseData(this.CREATE, { id });
   }
 
-  @ApiDocs({ method: "PATCH", endpoint: ":id", summary: `${<%= classify(name) %>Service.MODULE_NAME} 수정` })
+  @ApiDocs({
+    method: "PATCH",
+    endpoint: ":id",
+    summary: `${<%= classify(name) %>Service.MODULE_NAME} 수정`,
+  })
   async update(
     @Param("id", ParseIntPipe) id: number,
     @Body() body: <%= classify(name) %>UpdateDto,
@@ -49,7 +67,11 @@ export class <%= classify(name) %>Controller extends CommonController {
     return this.responseData(this.UPDATE);
   }
 
-  @ApiDocs({ method: "DELETE", endpoint: ":id", summary: `${<%= classify(name) %>Service.MODULE_NAME} 삭제` })
+  @ApiDocs({
+    method: "DELETE",
+    endpoint: ":id",
+    summary: `${<%= classify(name) %>Service.MODULE_NAME} 삭제`,
+  })
   async softDelete(@Param("id") id: number): Promise<NullDataResponseDto> {
     await this.service.softDelete(id);
     return this.responseData(this.DELETE);
