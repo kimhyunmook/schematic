@@ -11,7 +11,15 @@ NestJS 프로젝트를 위한 CRUD 모듈 자동 생성 도구입니다. Prisma 
 - ✅ **package.json 설정 지원** - 기본 경로 및 옵션을 설정 파일에서 관리
 - ✅ **환경변수 지원** - `.env` 파일로 프로젝트별 기본값 설정
 - ✅ **색상화된 CLI** - 가독성 높은 터미널 출력 🎨
-- ✅ **도메인별 템플릿** - space, doda 등 여러 도메인 템플릿 지원
+- ✅ **도메인별 템플릿** - default, admin, children 등 여러 도메인 템플릿 지원
+
+### 🔒 서비스 로직 개선
+
+- ✅ **Repository 패턴** - `this.repository`를 통한 일관된 데이터 접근
+- ✅ **에러 처리 강화** - `findUniqueOrThrow`로 명시적 에러 처리
+- ✅ **Soft Delete 필터링** - 모든 조회에서 `deletedAt: null` 자동 필터링
+- ✅ **존재 검증** - `update`, `softDelete` 전에 `findUniqueOrThrow` 호출
+- ✅ **권한 체크** - children 도메인에서 `softDelete` 시 권한 검증
 
 ### 📁 Prisma 파일 지원 향상
 
@@ -56,19 +64,21 @@ cd /path/to/your-nestjs-project
 
 # .env 파일 생성
 cat > .env << 'EOF'
-SC_DEFAULT_DOMAIN=space
-SC_DEFAULT_PATH=src/resources
-SC_DEFAULT_PRISMA_PATH=prisma/schema.prisma
+CRUD_DEFAULT_DOMAIN=default
+CRUD_DEFAULT_PATH=src/resources
+CRUD_DEFAULT_PRISMA_PATH=prisma/schema.prisma
+CRUD_EXCLUDED_DIRECTORIES=node_modules,dist,.git
+CRUD_SEARCH_DIRECTORIES=prisma,src
 EOF
 ```
 
 **설정 가능한 환경변수:**
 
-- `SC_DEFAULT_DOMAIN` - 기본 도메인 템플릿 (기본값: space)
-- `SC_DEFAULT_PATH` - 기본 생성 경로 (기본값: src/resources)
-- `SC_DEFAULT_PRISMA_PATH` - 기본 Prisma 경로 (기본값: prisma/schema.prisma)
-- `SC_EXCLUDED_DIRECTORIES` - 검색 제외 폴더
-- `SC_SEARCH_DIRECTORIES` - Prisma 파일 검색 폴더
+- `CRUD_DEFAULT_DOMAIN` - 기본 도메인 템플릿 (기본값: default)
+- `CRUD_DEFAULT_PATH` - 기본 생성 경로 (기본값: src/resources)
+- `CRUD_DEFAULT_PRISMA_PATH` - 기본 Prisma 경로 (기본값: prisma/schema.prisma)
+- `CRUD_EXCLUDED_DIRECTORIES` - 검색 제외 폴더 (기본값: node_modules,dist,.git,.next,.nuxt,build,out,coverage,.turbo,.cache)
+- `CRUD_SEARCH_DIRECTORIES` - Prisma 파일 검색 폴더 (기본값: prisma,src)
 
 ## 🚀 사용 방법
 
@@ -78,20 +88,21 @@ npm link 후 간편하게 사용:
 
 ```bash
 # 기본 사용 (대화형 - 도메인 선택 프롬프트)
-schematic User              # 또는 sc User
-sc User                     # 짧은 명령어
+schematic User              # 또는 crud User
+crud User                   # 짧은 명령어
 
 # 도메인 지정 (프롬프트 스킵)
-sc Product space            # space 도메인
-sc Order doda               # doda 도메인
+crud Product default        # default 도메인
+crud Order admin            # admin 도메인
+crud Target children         # children 도메인
 
 # 옵션과 함께 사용
-sc Payment space --path=src/api
-sc Invoice --prismaPath=prisma/invoice.prisma
+crud Payment default --path=src/api
+crud Invoice --prismaPath=prisma/invoice.prisma
 
 # 도움말 확인
 schematic --help
-sc --help
+crud --help
 ```
 
 ### 방법 2: Schematics CLI
@@ -107,18 +118,20 @@ schematics .:crud-module --name=product --path=src/api
 schematics .:crud-module --name=order --prismaPath=prisma/order.prisma
 
 # 도메인 템플릿 지정
-schematics .:crud-module --name=payment --domain=space
+schematics .:crud-module --name=payment --domain=default
+schematics .:crud-module --name=payment --domain=admin
+schematics .:crud-module --name=payment --domain=children
 ```
 
 ### CLI 특징
 
-- ✅ **초간단 명령어**: `sc User space` 간단하게! 🚀
+- ✅ **초간단 명령어**: `crud User default` 간단하게! 🚀
 - ✅ **색상화된 출력**: 가독성 높은 컬러풀한 터미널 출력 🎨
 - ✅ **프로젝트 검증**: NestJS 프로젝트인지 자동 확인
 - ✅ **상세한 출력**: 생성된 파일 목록 표시
 - ✅ **에러 처리**: 친절한 에러 메시지
 - ✅ **자동화**: app.module 업데이트 + Prettier 포맷팅
-- ✅ **두 가지 명령어**: `sc` (짧게) 또는 `schematic` (길게)
+- ✅ **두 가지 명령어**: `crud` (짧게) 또는 `schematic` (길게)
 - ✅ **환경변수 지원**: 프로젝트별 기본값 설정 가능
 
 ## 🎭 도메인 템플릿 선택
@@ -128,14 +141,17 @@ schematics .:crud-module --name=payment --domain=space
 ### 기본 사용법
 
 ```bash
-# 기본 사용 (space 도메인이 기본값)
-sc User
+# 기본 사용 (default 도메인이 기본값)
+crud User
 
-# space 도메인 명시적 지정
-sc User space
+# default 도메인 명시적 지정
+crud User default
 
-# doda 도메인 사용
-sc User doda
+# admin 도메인 사용
+crud User admin
+
+# children 도메인 사용
+crud User children
 
 # 향후 다른 도메인 템플릿도 추가 가능
 ```
@@ -144,11 +160,15 @@ sc User doda
 
 ```
 src/crud/file/
-├── space/              # Space 도메인 템플릿
+├── default/            # Default 도메인 템플릿 (기본 CRUD)
 │   ├── __name@dasherize__.module.ts.template
 │   ├── __name@dasherize__.service.ts.template
 │   └── ... (기타 템플릿 파일)
-├── doda/               # Doda 도메인 템플릿
+├── admin/              # Admin 도메인 템플릿 (관리자용)
+│   ├── __name@dasherize__.module.ts.template
+│   ├── __name@dasherize__.service.ts.template
+│   └── ... (기타 템플릿 파일)
+├── children/           # Children 도메인 템플릿 (자식 모듈)
 │   ├── __name@dasherize__.module.ts.template
 │   ├── __name@dasherize__.service.ts.template
 │   └── ... (기타 템플릿 파일)
@@ -163,35 +183,35 @@ src/crud/file/
 
 ```bash
 # 예시: custom 도메인 템플릿 사용
-sc Product custom
+crud Product custom
 ```
 
 ### 📁 Prisma 파일 자동 탐색 (확장된 재귀 검색)
 
-이 도구는 **`prisma`와 `src` 폴더**와 모든 하위 폴더에서 모듈 이름과 일치하는 `.prisma` 파일을 자동으로 찾습니다!
+이 도구는 **`prisma`와 `src` 폴더**와 모든 하위 폴더에서 모듈 이름과 일치하는 `.prisma` 파일을 자동으로 찾습니다! 재귀적으로 하위 폴더를 탐색하되, 최대 깊이 제한(기본 10단계)을 두어 성능을 최적화했습니다.
 
 #### 지원되는 Prisma 파일 구조:
 
 ```
 prisma/
-├── user.prisma                    ✅ sc User 실행 시 자동 탐지
-├── product.prisma                 ✅ sc Product 실행 시 자동 탐지
+├── user.prisma                    ✅ crud User 실행 시 자동 탐지
+├── product.prisma                 ✅ crud Product 실행 시 자동 탐지
 ├── schema.prisma                  ✅ 공통 스키마 (fallback)
 ├── domains/
 │   ├── auth/
-│   │   └── user.prisma            ✅ sc User 실행 시 자동 탐지
+│   │   └── user.prisma            ✅ crud User 실행 시 자동 탐지
 │   └── commerce/
-│       └── order.prisma           ✅ sc Order 실행 시 자동 탐지
+│       └── order.prisma           ✅ crud Order 실행 시 자동 탐지
 └── modules/
     └── payment/
-        └── payment.prisma         ✅ sc Payment 실행 시 자동 탐지
+        └── payment.prisma         ✅ crud Payment 실행 시 자동 탐지
 
 src/
 ├── user/
-│   └── user.prisma                ✅ sc User 실행 시 자동 탐지 (src에서도 찾음!)
+│   └── user.prisma                ✅ crud User 실행 시 자동 탐지 (src에서도 찾음!)
 └── resources/
     └── product/
-        └── product.prisma         ✅ sc Product 실행 시 자동 탐지
+        └── product.prisma         ✅ crud Product 실행 시 자동 탐지
 ```
 
 **탐색 우선순위:**
@@ -203,7 +223,10 @@ src/
 
 **⚡ 성능 최적화:**
 
-- `node_modules`, `dist`, `.git`, `build` 등 불필요한 폴더는 자동으로 제외됩니다
+- `node_modules`, `dist`, `.git`, `.next`, `.nuxt`, `build`, `out`, `coverage`, `.turbo`, `.cache` 등 불필요한 폴더는 자동으로 제외됩니다
+- 최대 깊이 제한(기본 10단계)으로 무한 재귀 방지
+- 제외 디렉토리 사전 필터링으로 불필요한 검색 방지
+- 상세한 디버그 로깅으로 검색 과정 추적 가능
 
 **예시: `prisma/User.prisma`**
 
@@ -270,7 +293,7 @@ schematic/
 
 ## 📝 생성되는 파일
 
-`schematic User` 명령어 실행 시 다음 파일들이 `src/resources/user/` 디렉토리에 생성됩니다:
+`crud User` 명령어 실행 시 다음 파일들이 `src/resources/user/` 디렉토리에 생성됩니다:
 
 ```
 src/resources/user/
@@ -295,10 +318,30 @@ src/resources/user/
 각 모듈은 다음 기능을 포함합니다:
 
 - **Create**: 새 리소스 생성
-- **FindUnique**: ID로 단일 리소스 조회
-- **FindMany**: 페이지네이션을 포함한 다중 리소스 조회
-- **Update**: 리소스 수정
-- **SoftDelete**: 소프트 삭제 (deletedAt 필드 업데이트)
+- **FindUniqueOrThrow**: ID로 단일 리소스 조회 (NotFoundException 처리)
+- **FindMany**: 페이지네이션을 포함한 다중 리소스 조회 (deletedAt: null 필터링)
+- **Update**: 리소스 수정 (존재 여부 검증 포함)
+- **SoftDelete**: 소프트 삭제 (deletedAt 필드 업데이트, 존재 여부 검증 포함)
+
+### 도메인별 차이점
+
+#### **default 도메인**
+
+- 기본 CRUD 기능 제공
+- `deletedAt: null` 필터링으로 삭제된 데이터 제외
+
+#### **admin 도메인**
+
+- 모든 기본 기능 제공
+- `includeDeleted` 옵션으로 삭제된 데이터도 조회 가능
+- `hardDelete`: 완전 삭제 기능
+- `restore`: 삭제된 데이터 복구 기능
+
+#### **children 도메인**
+
+- 모든 기본 기능 제공
+- `softDelete`에 권한 체크 추가 (`AccountPayload` 파라미터)
+- 부모 모듈 의존성 주입 가능 (관계 필드 검증 등)
 
 ## 🛠 개발 가이드
 

@@ -1,7 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import {
   I<%= classify(name) %>Create,
-  I<%= classify(name) %>FindUnique,
   I<%= classify(name) %>FindMany,
   I<%= classify(name) %>Update,
 } from "./<%= dasherize(name) %>.interface";
@@ -9,36 +8,47 @@ import { PrismaService } from "src/core/prisma/prisma.service";
 import { CommonService } from "src/common/utils/common.service";
 import { createPaginationOptions } from "src/common/helpers/pagination.helper";
 import { Prisma } from "@prisma/client";
+import { AccountPayload } from "src/common/interface/accout.interface";
 
 @Injectable()
 export class <%= classify(name) %>Service extends CommonService {
-  public static readonly MODULE_NAME = "<%= MODULE_NAME %> (Children)";
+  public static readonly MODULE_NAME = "<%= MODULE_NAME %>";
 
-  constructor(private readonly prisma: PrismaService) {
+  private repository: PrismaService["<%= camelize(name) %>"];
+
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {
     super({ NAME: <%= classify(name) %>Service.MODULE_NAME });
+    this.repository = this.prisma.<%= camelize(name) %>;
   }
 
   async create(data: I<%= classify(name) %>Create) {
-    return this.prisma.<%= camelize(name) %>.create({ data });
+    return this.repository.create({ data });
   }
 
-  async findUnique(data: I<%= classify(name) %>FindUnique) {
-    return this.prisma.<%= camelize(name) %>.findUnique({
-      where: {
-        ...data,
-      },
+  async findUniqueOrThrow(id: number) {
+    const resource = await this.repository.findUnique({
+      where: { id, deletedAt: null },
     });
+    if (!resource) {
+      throw new NotFoundException(`<%= MODULE_NAME %>을(를) 찾을 수 없습니다`);
+    }
+    return resource;
   }
 
   async findMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
     const option: Prisma.<%= classify(name) %>FindManyArgs = {
-      where: { ...rest },
+      where: {
+        ...rest,
+        deletedAt: null,
+      },
       ...createPaginationOptions({ page, take, sort }),
     };
 
     const [resources, totalCount] = await this.prisma.$transaction([
-      this.prisma.<%= camelize(name) %>.findMany(option),
-      this.prisma.<%= camelize(name) %>.count({ where: option.where }),
+      this.repository.findMany(option),
+      this.repository.count({ where: option.where }),
     ]);
 
     const meta = this.getMetaData({
@@ -52,18 +62,19 @@ export class <%= classify(name) %>Service extends CommonService {
 
   async update(data: I<%= classify(name) %>Update) {
     const { id, ...rest } = data;
-    return this.prisma.<%= camelize(name) %>.update({
-      where: {
-        id,
-      },
-      data: {
-        ...rest,
-      },
+    await this.findUniqueOrThrow(id);
+    return this.repository.update({
+      where: { id },
+      data: { ...rest },
     });
   }
 
-  async softDelete(id: number) {
-    return this.prisma.<%= camelize(name) %>.update({
+  async softDelete(id: number, account: AccountPayload) {
+    if (account.role !== "user") {
+      throw new ForbiddenException("삭제 권한이 없습니다");
+    }
+    await this.findUniqueOrThrow(id);
+    return this.repository.update({
       where: { id },
       data: {
         deletedAt: new Date(),
