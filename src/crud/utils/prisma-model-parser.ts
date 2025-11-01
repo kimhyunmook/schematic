@@ -117,8 +117,11 @@ export function parsePrismaModel(
     const result: PrismaModel = {
         name: selectedModel.name,
         fields,
-        enums: enums.length > 0 ? enums : undefined
     };
+
+    if (enums.length > 0) {
+        result.enums = enums;
+    }
 
     if (moduleName) {
         result.moduleName = moduleName;
@@ -145,7 +148,7 @@ function extractEnums(text: string): string[] {
 
         // enum 키워드로 시작하는 라인 찾기
         const enumMatch = trimmed.match(/^enum\s+(\w+)\s*\{/);
-        if (enumMatch) {
+        if (enumMatch && enumMatch[1]) {
             if (currentEnum) {
                 // 이전 enum이 완료되지 않았다면 저장
                 enums.push(currentEnum);

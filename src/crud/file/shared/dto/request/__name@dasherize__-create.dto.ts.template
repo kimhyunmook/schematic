@@ -1,5 +1,7 @@
 import { <%= classify(name) %>Model } from "../../models/<%= dasherize(name) %>.model";
 
+import { I<%= classify(name) %>Create } from "../../<%= dasherize(name) %>.interface";
+
 import { CreateDtoFromModel } from "src/common/helpers/create-from-model.dto";
 <% 
 // Create DTO에서 자동 제외할 필드들
@@ -31,7 +33,13 @@ const optionalFields = prismaModel && prismaModel.fields
       ).map((f) => `"${f.name}"`)
     : [];
 %>
-export class <%= classify(name) %>CreateDto extends CreateDtoFromModel({
+export class <%= classify(name) %>MgmtCreateDto extends CreateDtoFromModel({
+  model: <%= classify(name) %>Model,
+  pick: [<%= pickFields.join(", ") || "" %>],
+  optional: [<%= optionalFields.join(", ") || "" %>],
+}) {}
+
+export class <%= classify(name) %>UserCreateDto extends CreateDtoFromModel({
   model: <%= classify(name) %>Model,
   pick: [<%= pickFields.join(", ") || "" %>],
   optional: [<%= optionalFields.join(", ") || "" %>],

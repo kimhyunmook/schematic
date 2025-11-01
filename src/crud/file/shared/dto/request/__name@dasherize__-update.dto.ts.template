@@ -1,12 +1,22 @@
 import { IntersectionType, OmitType, PartialType, PickType } from "@nestjs/swagger";
-import { <%= classify(name) %>CreateDto } from "./<%= dasherize(name) %>-create.dto";
+
+import { <%= classify(name) %>MgmtCreateDto } from "./<%= dasherize(name) %>-create.dto";
+
 import { <%= classify(name) %>Model } from "../../models/<%= dasherize(name) %>.model";
+
 import { I<%= classify(name) %>Update } from "../../<%= dasherize(name) %>.interface";
 
-export class <%= classify(name) %>UpdateDto
+export class <%= classify(name) %>MgmtUpdateDto
   extends IntersectionType(
     PickType(<%= classify(name) %>Model, ["id"]),
-    OmitType(PartialType(<%= classify(name) %>CreateDto), [])
+    OmitType(PartialType(<%= classify(name) %>MgmtCreateDto), [])
+  )
+  implements I<%= classify(name) %>Update {}
+
+export class <%= classify(name) %>UserUpdateDto
+  extends IntersectionType(
+    PickType(<%= classify(name) %>Model, ["id"]),
+    OmitType(PartialType(<%= classify(name) %>MgmtCreateDto), [])
   )
   implements I<%= classify(name) %>Update {}
 

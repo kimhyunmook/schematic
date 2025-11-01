@@ -8,6 +8,7 @@ import { PrismaService } from "src/core/prisma/prisma.service";
 import { CommonService } from "src/common/utils/common.service";
 import { createPaginationOptions } from "src/common/helpers/pagination.helper";
 import { Prisma } from "@prisma/client";
+import { AccountPayload } from "src/common/interface/accout.interface";
 
 @Injectable()
 export class <%= classify(name) %>Service extends CommonService {
@@ -20,11 +21,11 @@ export class <%= classify(name) %>Service extends CommonService {
     this.repository = this.prisma.<%= camelize(name) %>;
   }
 
-  async create(data: I<%= classify(name) %>Create) {
+  async create(data: I<%= classify(name) %>Create, account?: AccountPayload) {
     return this.repository.create({ data });
   }
 
-  async findUniqueOrThrow(id: number) {
+  async findUniqueOrThrow(id: number, account?: AccountPayload) {
     const resource = await this.repository.findUnique({
       where: { id, deletedAt: null },
     });
@@ -34,7 +35,7 @@ export class <%= classify(name) %>Service extends CommonService {
     return resource;
   }
 
-  async findMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany) {
+  async findMany({ page, take, sort, ...rest }: I<%= classify(name) %>FindMany, account?: AccountPayload) {
     const option: Prisma.<%= classify(name) %>FindManyArgs = {
       where: {
         ...rest,
@@ -57,7 +58,7 @@ export class <%= classify(name) %>Service extends CommonService {
     return { resources, meta };
   }
 
-  async update(data: I<%= classify(name) %>Update) {
+  async update(data: I<%= classify(name) %>Update, account?: AccountPayload) {
     const { id, ...rest } = data;
     await this.findUniqueOrThrow(id);
     return this.repository.update({
@@ -66,7 +67,7 @@ export class <%= classify(name) %>Service extends CommonService {
     });
   }
 
-  async softDelete(id: number) {
+  async softDelete(id: number, account?: AccountPayload) {
     await this.findUniqueOrThrow(id);
     return this.repository.update({
       where: { id },
